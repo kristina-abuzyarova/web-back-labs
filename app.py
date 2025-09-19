@@ -4,12 +4,12 @@ app = Flask(__name__)
 @app.route("/")
 @app.route("/web")
 def web():
-    return """<!doctype html>
+    return """<!doctype html> 
         <html>
-           <body>
-              <h1>web-сервер на flask</h1>
-              <a href="/author">author</a>
-           </body>
+            <body>
+                <h1>web-сервер на flask</h1>
+                <a href="/author">author</a>
+            </body>
         </html>"""
 
 @app.route("/author")
@@ -20,8 +20,7 @@ def author():
 
     return """<!doctype html>
         <html>
-
-        <body>
+            <body>
                 <p>Студент: """ + name + """</p>
                 <p>Группа: """ + group + """</p>
                 <p>Факультет: """ + faculty + """</p>
@@ -36,8 +35,21 @@ def image():
 <!doctype html>
 <html>
     <body>
-        <h1>Дуб</h1>
+        <h1>кот</h1>
         <img src="''' + path + '''">
     </body>
-</html>
-'''
+</html>'''
+
+сount = 0
+
+@app.route('/counter')
+def counter():
+    global count
+    count +=1
+    return '''
+<!doctype html>
+<html>
+    <body>
+        Сколько раз вы сюда заходили: ''' + str(count) + '''
+    </body>
+</html>'''

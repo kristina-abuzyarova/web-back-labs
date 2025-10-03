@@ -3,11 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{name}}. {{number}}</title>
+    <title>        {% if name %}{{ name }}{% else %}Анонимус{% endif %}
+        {% if number %}. Лабораторная работа {{ number }}{% endif %}
+    </title>
+    <link rel="stylesheet" href="{{url_for('static', filename='main.css')}}">
 </head>
 <body>
     <header>
-        WEB-программирование, часть 2. {{number}}
+        WEB-программирование, часть 2.
+        {% if number %} Лабораторная работа {{ number }}{% endif %}
     </header>
     
     <main>
@@ -16,10 +20,33 @@
         3258 - 759 = {{3258 - 759}}<br>
         8452 / 793 = {{8452 / 793}}<br>
         45<sup>8</sup> = {{45**8}}<br>
+        <ul>
+            {% for f in fruits %}
+            <li>{{ loop.index }} - {{ f.name }}: {{ f.price }} &#8381;</li>
+            {% endfor %}
+        </ul>
     </main>
 
     <footer>
-        &copy;{{ name}}, {{group}}, {{course}}, 2025
+        &copy;
+        {% if name %}
+            {{ name }},
+        {% else %}
+            Анонимус,
+        {% endif %}
+
+        {% if group %}
+            {{ group }},
+        {% else %}
+            группа не указана,
+        {% endif %}
+
+        {% if course %}
+            {{ course }}
+        {% else %}
+            курс не указан
+        {% endif %}
+        2025
     </footer>
 </body>
 </html>

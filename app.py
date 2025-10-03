@@ -347,4 +347,4 @@ def example():
     number = 'Лабораторная работа 2'
     group = 'ФБИ-34'
     course = '3 курс'
-    return render_template('example.html', name=name, number=number, group=group, course=course)
+    return render_template('example.html')

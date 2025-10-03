@@ -15,6 +15,7 @@ def index():
         <nav>
             <ul>
                 <li><a href="/lab1">Первая лабораторная</a></li>
+                <li><a href="/lab2">Вторая лабораторная</a></li>
             </ul>
         </nav>
         <footer>
@@ -452,3 +453,110 @@ books = [
 @app.route('/lab2/books/')
 def books_list():
     return render_template('books.html', books=books)
+
+cats = [
+    {
+        'name': 'Персидский кот',
+        'image': 'persian.jpg',
+        'description': 'Пушистый кот с плоской мордочкой и длинной шерстью.'
+    },
+    {
+        'name': 'Сиамский кот',
+        'image': 'siamese.jpg',
+        'description': 'Элегантный кот с голубыми глазами и контрастным окрасом.'
+    },
+    {
+        'name': 'Мейн-кун',
+        'image': 'maine_coon.jpg',
+        'description': 'Крупная порода с кисточками на ушах и дружелюбным характером.'
+    },
+    {
+        'name': 'Британский кот',
+        'image': 'british.jpg',
+        'description': 'Коренастый кот с плюшевой шерстью и спокойным нравом.'
+    },
+    {
+        'name': 'Сфинкс',
+        'image': 'sphynx.jpg',
+        'description': 'Бесшерстная порода с морщинистой кожей и теплым телом.'
+    },
+    {
+        'name': 'Бенгальский кот',
+        'image': 'bengal.jpg',
+        'description': 'Дикий вид с леопардовым окрасом и активным характером.'
+    },
+    {
+        'name': 'Русский голубой',
+        'image': 'russian_blue.jpg',
+        'description': 'Серебристо-голубая шерсть и изумрудные глаза.'
+    },
+    {
+        'name': 'Норвежский лесной',
+        'image': 'norwegian.jpg',
+        'description': 'Крупный кот с густой водонепроницаемой шерстью.'
+    },
+    {
+        'name': 'Шотландский вислоухий',
+        'image': 'scottish_fold.jpg',
+        'description': 'Кот с загнутыми вперед ушами и круглыми глазами.'
+    },
+    {
+        'name': 'Абиссинский кот',
+        'image': 'abyssinian.jpg',
+        'description': 'Стройный кот с тикированной шерстью и активным характером.'
+    },
+    {
+        'name': 'Рэгдолл',
+        'image': 'ragdoll.jpg',
+        'description': 'Крупный кот, который расслабляется на руках как тряпичная кукла.'
+    },
+    {
+        'name': 'Бирманский кот',
+        'image': 'birman.jpg',
+        'description': 'Священная порода с белыми "носочками" и голубыми глазами.'
+    },
+    {
+        'name': 'Ориентальный кот',
+        'image': 'oriental.jpg',
+        'description': 'Стройный кот с большими ушами и грациозной внешностью.'
+    },
+    {
+        'name': 'Турецкий ван',
+        'image': 'turkish_van.jpg',
+        'description': 'Кот, любящий воду, с характерным красно-белым окрасом.'
+    },
+    {
+        'name': 'Египетский мау',
+        'image': 'egyptian_mau.jpg',
+        'description': 'Пятнистая порода, одна из древнейших в мире.'
+    },
+    {
+        'name': 'Тонкинский кот',
+        'image': 'tonkinese.jpg',
+        'description': 'Гибрид сиамской и бирманской пород с аквамариновыми глазами.'
+    },
+    {
+        'name': 'Корниш-рекс',
+        'image': 'cornish_rex.jpg',
+        'description': 'Кот с волнистой шерстью и стройным телом.'
+    },
+    {
+        'name': 'Девон-рекс',
+        'image': 'devon_rex.jpg',
+        'description': 'Кот с большими ушами и волнистой шерстью, похож на эльфа.'
+    },
+    {
+        'name': 'Сибирский кот',
+        'image': 'siberian.jpg',
+        'description': 'Крупный кот с густой шерстью, адаптированной к холоду.'
+    },
+    {
+        'name': 'Манчкин',
+        'image': 'munchkin.jpg',
+        'description': 'Кот с короткими лапками и игривым характером.'
+    }
+]
+
+@app.route('/lab2/cats/')
+def cats_list():
+    return render_template('cats.html', cats=cats)

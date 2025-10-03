@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block lab %}Лабораторная работа 2{% endblock %}
+
+{% block main %}
+    <h1>Породы кошек</h1>
+    <p>Всего пород: {{ cats|length }}</p>
+    
+    {% for cat in cats %}
+    <div>
+        <h3>{{ loop.index }}. {{ cat.name }}</h3>
+        <img src="{{ url_for('static', filename='images/' + cat.image) }}" alt="{{ cat.name }}" width="300">
+        <p>{{ cat.description }}</p>
+        <hr>
+    </div>
+    {% endfor %}
+{% endblock %}

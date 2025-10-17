@@ -1,9 +1,13 @@
 from flask import Flask, url_for, request, redirect, abort, render_template
-import datetime
 from lab1 import lab1
+from lab2 import lab2
+from lab2 import lab3
+
 
 app = Flask(__name__)
 app.register_blueprint(lab1)
+app.register_blueprint(lab2)
+app.register_blueprint(lab3)
 
 @app.route('/')
 @app.route('/index')
@@ -19,6 +23,7 @@ def index():
             <ul>
                 <li><a href="/lab1">Первая лабораторная</a></li>
                 <li><a href="/lab2">Вторая лабораторная</a></li>
+                <li><a href="/lab3">Третья лабораторная</a></li>
             </ul>
         </nav>
         <footer>
@@ -27,61 +32,8 @@ def index():
     </body>
 </html>'''
 
-@app.route("/400")
-def bad_request():
-    return '''<!doctype html>
-<html>
-<head>
-    <title>400 Bad Request</title>
-</head>
-<body>
-    <h1>400 Bad Request</h1>
-    <p>Сервер не может обработать запрос из-за синтаксической ошибки.</p>
-</body>
-</html>''', 400
-
-@app.route("/401")
-def unauthorized():
-    return '''<!doctype html>
-<html>
-<head>
-    <title>401 Unauthorized</title>
-</head>
-<body>
-    <h1>401 Unauthorized</h1>
-    <p>Для доступа к запрашиваемому ресурсу требуется аутентификация.</p>
-</body>
-</html>''', 401
-
-@app.route("/402")
-def payment_required():
-    return '''<!doctype html>
-<html>
-<head>
-    <title>402 Payment Required</title>
-</head>
-<body>
-    <h1>402 Payment Required</h1>
-    <p>Для доступа к ресурсу требуется оплата.</p>
-</body>
-</html>''', 402
-
-@app.route("/403")
-def forbidden():
-    return '''<!doctype html>
-<html>
-<head>
-    <title>403 Forbidden</title>
-</head>
-<body>
-    <h1>403 Forbidden</h1>
-    <p>Доступ к ресурсу запрещен.</p>
-</body>
-</html>''', 403
-
 journal = []
 
-journal = []
 
 @app.errorhandler(404)
 def not_found(err):
@@ -137,36 +89,6 @@ def not_found(err):
 </body>
 </html>''', 404
 
-@app.route("/405")
-def method_not_allowed():
-    return '''<!doctype html>
-<html>
-<head>
-    <title>405 Method Not Allowed</title>
-</head>
-<body>
-    <h1>405 Method Not Allowed</h1>
-    <p>Метод нельзя применить для данного ресурса.</p>
-</body>
-</html>''', 405
-
-@app.route("/418")
-def teapot():
-    return '''<!doctype html>
-<html>
-<head>
-    <title>418 I'm a teapot</title>
-</head>
-<body>
-    <h1>418 I'm a teapot</h1>
-    <p>Я чайник и не могу заваривать кофе.</p>
-</body>
-</html>''', 418
-
-@app.route('/cause_500')
-def cause_500():
-    raise RuntimeError("Ошибка для проверки 500")
-
 @app.errorhandler(500)
 def handle_500(err):
     return '''<!doctype html>
@@ -179,247 +101,4 @@ def handle_500(err):
   <p>Произошла ошибка. Попробуйте позже.</p>
   <a href="/">На главную</a>
 </body>
-'''
-@app.route('/lab2/a')
-def a():
-    return 'без слэша'
-
-@app.route('/lab2/a/')
-def a2():
-    return 'со слэшом'
-
-flower_list = [
-    {'name': 'роза', 'price': 300},
-    {'name': 'тюльпан', 'price': 310},
-    {'name': 'незабудка', 'price': 320},
-    {'name': 'ромашка', 'price': 330},
-    {'name': 'георгин', 'price': 300},
-    {'name': 'гладиолус', 'price': 310}
-]
-
-@app.route('/lab2/flowers/')
-def flowers_list():
-    return render_template('flowers.html', flowers=flower_list)
-
-@app.route('/lab2/del_flower/<int:flower_id>')
-def del_flower(flower_id): 
-
-    if flower_id >= len(flower_list):
-        abort(404)
-        flower_list.pop(flower_id)
-    return redirect(url_for('flowers_list'))
-
-@app.route('/lab2/add_flower/', methods=['GET', 'POST'])
-def add_flower():
-    if request.method == 'POST':
-        name = request.form.get('name', '').strip()
-        if name:
-            # есть ли такой цветок
-            for flower in flower_list:
-                if flower['name'] == name:
-                    # если есть, увеличиваем цену на 10 рублей
-                    flower['price'] += 10
-                    break
-            else:
-                # если нет, добавляем новый цветок с ценой 300
-                flower_list.append({'name': name, 'price': 300})
-        return redirect(url_for('flowers_list'))
-    return redirect(url_for('flowers_list'))
-
-@app.route('/lab2/flowers/all')
-def all_flowers():
-    return f'''
-<!doctype html>
-<html>
-    <body>
-        <h1>Все цветы</h1>
-        <p>Количество цветов: {len(flower_list)}</p>
-        <p>Полный список: {flower_list}</p>
-        <a href="/lab2/flowers/clear">Очистить список</a>
-    </body>
-</html>
-'''
-
-@app.route('/lab2/flowers/clear')
-def clear_flowers():
-    flower_list.clear()
-    return redirect(url_for('flowers_list'))
-
-@app.route('/lab2/example')
-def example():
-    name = 'Абузярова Кристина'
-    number = 'Лабораторная работа 2'
-    group = 'ФБИ-34'
-    course = '3 курс'
-    
-    fruits = [
-        {'name': 'яблоки', 'price': 100},
-        {'name': 'груши', 'price': 120},
-        {'name': 'апельсины', 'price': 80},
-        {'name': 'мандарины', 'price': 95},
-        {'name': 'манго', 'price': 321},
-    ]
-    return render_template('example.html', 
-                           name=name, number=number, group=group, 
-                           course=course, fruits=fruits)
-
-@app.route('/lab2/')
-def lab2():
-    return render_template('lab2.html')
-
-@app.route('/lab2/filters')
-def filters():
-    phrase = "О <b>сколько</b> <u>нам</u> <i>открытий</i> чудных..."
-    
-    return render_template('filter.html', phrase = phrase)
-
-@app.route('/lab2/calc/<int:a>/<int:b>')
-def calc(a, b):
-    return f'''
-<!doctype html>
-<html>
-<body>
-    <h1>Расчёт с параметрами:</h1>
-    <div class="result">
-        {a} + {b} = {a + b}<br>
-        {a} - {b} = {a - b}<br>
-        {a} × {b} = {a * b}<br>
-        {a} / {b} = {a / b if b != 0 else 'на ноль делить нельзя'}<br>
-        {a}<sup>{b}</sup> = {a ** b}
-    </div>
-    <p><a href="/lab2/calc/">Попробовать с другими числами</a></p>
-</body>
-</html>
-'''
-
-@app.route('/lab2/calc/')
-def calc_default():
-    return redirect('/lab2/calc/1/1')
-
-@app.route('/lab2/calc/<int:a>')
-def calc_single(a):
-    return redirect(f'/lab2/calc/{a}/1')
-
-books = [
-    {'author': 'Джоан Роулинг', 'title': 'Гарри Поттер и философский камень', 'genre': 'Фэнтези', 'pages': 432},
-    {'author': 'Джордж Оруэлл', 'title': '1984', 'genre': 'Антиутопия', 'pages': 328},
-    {'author': 'Джон Р. Р. Толкин', 'title': 'Властелин колец', 'genre': 'Фэнтези', 'pages': 1178},
-    {'author': 'Агата Кристи', 'title': 'Убийство в Восточном экспрессе', 'genre': 'Детектив', 'pages': 256},
-    {'author': 'Стивен Кинг', 'title': 'Оно', 'genre': 'Ужасы', 'pages': 1138},
-    {'author': 'Дэн Браун', 'title': 'Код да Винчи', 'genre': 'Триллер', 'pages': 489},
-    {'author': 'Харпер Ли', 'title': 'Убить пересмешника', 'genre': 'Роман', 'pages': 376},
-    {'author': 'Александр Солженицын', 'title': 'Архипелаг ГУЛАГ', 'genre': 'Историческая проза', 'pages': 1424},
-    {'author': 'Владимир Набоков', 'title': 'Лолита', 'genre': 'Роман', 'pages': 336},
-    {'author': 'Михаил Лермонтов', 'title': 'Герой нашего времени', 'genre': 'Роман', 'pages': 224},
-]
-
-@app.route('/lab2/books/')
-def books_list():
-    return render_template('books.html', books=books)
-
-cats = [
-    {
-        'name': 'Персидский кот',
-        'image': 'persian.jpg',
-        'description': 'Пушистый кот с плоской мордочкой и длинной шерстью.'
-    },
-    {
-        'name': 'Сиамский кот',
-        'image': 'siamese.jpg',
-        'description': 'Элегантный кот с голубыми глазами и контрастным окрасом.'
-    },
-    {
-        'name': 'Мейн-кун',
-        'image': 'maine_coon.jpg',
-        'description': 'Крупная порода с кисточками на ушах и дружелюбным характером.'
-    },
-    {
-        'name': 'Британский кот',
-        'image': 'british.jpg',
-        'description': 'Коренастый кот с плюшевой шерстью и спокойным нравом.'
-    },
-    {
-        'name': 'Сфинкс',
-        'image': 'sphynx.jpg',
-        'description': 'Бесшерстная порода с морщинистой кожей и теплым телом.'
-    },
-    {
-        'name': 'Бенгальский кот',
-        'image': 'bengal.jpg',
-        'description': 'Дикий вид с леопардовым окрасом и активным характером.'
-    },
-    {
-        'name': 'Русский голубой',
-        'image': 'russian_blue.jpg',
-        'description': 'Серебристо-голубая шерсть и изумрудные глаза.'
-    },
-    {
-        'name': 'Норвежский лесной',
-        'image': 'norwegian.jpg',
-        'description': 'Крупный кот с густой водонепроницаемой шерстью.'
-    },
-    {
-        'name': 'Шотландский вислоухий',
-        'image': 'scottish_fold.jpg',
-        'description': 'Кот с загнутыми вперед ушами и круглыми глазами.'
-    },
-    {
-        'name': 'Абиссинский кот',
-        'image': 'abyssinian.jpg',
-        'description': 'Стройный кот с тикированной шерстью и активным характером.'
-    },
-    {
-        'name': 'Рэгдолл',
-        'image': 'ragdoll.jpg',
-        'description': 'Крупный кот, который расслабляется на руках как тряпичная кукла.'
-    },
-    {
-        'name': 'Бирманский кот',
-        'image': 'birman.jpg',
-        'description': 'Священная порода с белыми "носочками" и голубыми глазами.'
-    },
-    {
-        'name': 'Ориентальный кот',
-        'image': 'oriental.jpg',
-        'description': 'Стройный кот с большими ушами и грациозной внешностью.'
-    },
-    {
-        'name': 'Турецкий ван',
-        'image': 'turkish_van.jpg',
-        'description': 'Кот, любящий воду, с характерным красно-белым окрасом.'
-    },
-    {
-        'name': 'Египетский мау',
-        'image': 'egyptian_mau.jpg',
-        'description': 'Пятнистая порода, одна из древнейших в мире.'
-    },
-    {
-        'name': 'Тонкинский кот',
-        'image': 'tonkinese.jpg',
-        'description': 'Гибрид сиамской и бирманской пород с аквамариновыми глазами.'
-    },
-    {
-        'name': 'Корниш-рекс',
-        'image': 'cornish_rex.jpg',
-        'description': 'Кот с волнистой шерстью и стройным телом.'
-    },
-    {
-        'name': 'Девон-рекс',
-        'image': 'devon_rex.jpg',
-        'description': 'Кот с большими ушами и волнистой шерстью, похож на эльфа.'
-    },
-    {
-        'name': 'Сибирский кот',
-        'image': 'siberian.jpg',
-        'description': 'Крупный кот с густой шерстью, адаптированной к холоду.'
-    },
-    {
-        'name': 'Манчкин',
-        'image': 'munchkin.jpg',
-        'description': 'Кот с короткими лапками и игривым характером.'
-    }
-]
-
-@app.route('/lab2/cats/')
-def cats_list():
-    return render_template('cats.html', cats=cats)
+</html>''', 500

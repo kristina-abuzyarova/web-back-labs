@@ -1,0 +1,30 @@
+[1mdiff --git a/README.md b/README.md[m
+[1mindex 013cd3a..7eda7b5 100644[m
+[1m--- a/README.md[m
+[1m+++ b/README.md[m
+[36m@@ -8,4 +8,8 @@[m
+ [m
+ ## Лабораторная работа 2. Шаблоны в flask[m
+ [m
+[31m-*Дата: 03.04.2025*[m
+\ No newline at end of file[m
+[32m+[m[32m*Дата: 03.10.2025*[m
+[32m+[m
+[32m+[m[32m## Лабораторная работа 3. Формы[m
+[32m+[m
+[32m+[m[32m*Дата: 17.10.2025*[m
+\ No newline at end of file[m
+[1mdiff --git a/templates/flowers.html b/templates/flowers.html[m
+[1mindex e3e1e67..c09265f 100644[m
+[1m--- a/templates/flowers.html[m
+[1m+++ b/templates/flowers.html[m
+[36m@@ -54,7 +54,7 @@[m
+     <a href="{{ url_for('flowers_list') }}">Обновить список</a>[m
+ [m
+     <footer>[m
+[31m-        &copy; Алина Геворкян, ФБИ-33, 3 курс, 2025[m
+[32m+[m[32m        &copy; Абузярова Кристина , ФБИ-34[m
+     </footer>[m
+ </body>[m
+ </html>[m
+\ No newline at end of file[m

@@ -117,7 +117,67 @@ def settings():
                           color=current_color, 
                           bg_color=current_bg_color, 
                           font_size=current_font_size,
-                          font_family=current_font_family)
+                           font_family=current_font_family)
+
+
+@lab3.route('/lab3/ticket')
+def ticket():
+    errors = {}
+    fio = request.args.get('fio')
+    shelf = request.args.get('shelf')
+    bedding = request.args.get('bedding')
+    baggage = request.args.get('baggage')
+    age = request.args.get('age')
+    departure = request.args.get('departure')
+    destination = request.args.get('destination')
+    date = request.args.get('date')
+    insurance = request.args.get('insurance')
+    
+    if not fio:
+        errors['fio'] = 'Заполните поле'
+    if not shelf:
+        errors['shelf'] = 'Выберите полку'
+    if not age:
+        errors['age'] = 'Заполните поле'
+    elif not age.isdigit() or not (1 <= int(age) <= 120):
+        errors['age'] = 'Возраст должен быть от 1 до 120 лет'
+    if not departure:
+        errors['departure'] = 'Заполните поле'
+    if not destination:
+        errors['destination'] = 'Заполните поле'
+    if not date:
+        errors['date'] = 'Заполните поле'
+    
+    if errors or not all([fio, shelf, age, departure, destination, date]):
+        return render_template('lab3/ticket_form.html', 
+                             errors=errors,
+                             fio=fio, shelf=shelf, bedding=bedding, 
+                             baggage=baggage, age=age, departure=departure,
+                             destination=destination, date=date, insurance=insurance)
+    
+    if int(age) < 18:
+        base_price = 700
+        ticket_type = 'Детский билет'
+    else:
+        base_price = 1000
+        ticket_type = 'Взрослый билет'
+    
+    total_price = base_price
+    
+    if shelf in ['lower', 'lower-side']:
+        total_price += 100
+    if bedding == 'on':
+        total_price += 75
+    if baggage == 'on':
+        total_price += 250
+    if insurance == 'on':
+        total_price += 150
+    
+    return render_template('lab3/ticket_result.html',
+                         fio=fio, shelf=shelf, bedding=bedding,
+                         baggage=baggage, age=age, departure=departure,
+                         destination=destination, date=date, insurance=insurance,
+                         ticket_type=ticket_type, total_price=total_price)
 
     return resp
 

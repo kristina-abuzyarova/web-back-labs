@@ -106,3 +106,4 @@ def handle_500(err):
   <a href="/">На главную</a>
 </body>
 </html>''', 500
+

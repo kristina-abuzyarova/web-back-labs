@@ -1,13 +1,15 @@
+from datetime import datetime  
 from flask import Flask, url_for, request, redirect, abort, render_template
 from lab1 import lab1
 from lab2 import lab2
 from lab3 import lab3
-
+from lab4 import lab4
 
 app = Flask(__name__)
 app.register_blueprint(lab1)
 app.register_blueprint(lab2)
 app.register_blueprint(lab3)
+app.register_blueprint(lab4)
 
 @app.route('/')
 @app.route('/index')
@@ -28,6 +30,7 @@ def index():
                 <li><a href="/lab1">Первая лабораторная</a></li>
                 <li><a href="/lab2">Вторая лабораторная</a></li>
                 <li><a href="/lab3">Третья лабораторная</a></li>
+                <li><a href="/lab4">Четвертая лабораторная</a></li>
             </ul>
         </nav>
         <footer>
@@ -37,7 +40,6 @@ def index():
 </html>'''
 
 journal = []
-
 
 @app.errorhandler(404)
 def not_found(err):
@@ -49,7 +51,7 @@ def not_found(err):
     journal.append(entry)
 
     log_html = "<h3>Журнал:</h3><ul>"
-    for record in journal[-10:]:
+    for record in journal[-10:]:  
         log_html += f"<li>{record}</li>"
     log_html += "</ul>"
 
@@ -106,4 +108,7 @@ def handle_500(err):
   <a href="/">На главную</a>
 </body>
 </html>''', 500
+
+if __name__ == '__main__':
+    app.run(debug=True)
 

@@ -1,7 +1,7 @@
 from flask import Flask, url_for, request, redirect, abort, render_template
 from lab1 import lab1
 from lab2 import lab2
-from lab2 import lab3
+from lab3 import lab3
 
 
 app = Flask(__name__)
@@ -41,7 +41,7 @@ journal = []
 
 @app.errorhandler(404)
 def not_found(err):
-    time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     ip = request.remote_addr
     url = request.url
 

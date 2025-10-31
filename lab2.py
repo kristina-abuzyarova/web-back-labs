@@ -12,6 +12,7 @@ def a():
 def a2():
     return 'со слэшом'
 
+
 flower_list = [
     {'name': 'роза', 'price': 300},
     {'name': 'тюльпан', 'price': 310},
@@ -96,6 +97,8 @@ def lab2():
     return render_template('lab2.html')
 
 
+from flask import Blueprint
+lab2 = Blueprint('lab2', __name__)
 @lab2.route('/lab2/filters')
 def filters():
     phrase = "О <b>сколько</b> <u>нам</u> <i>открытий</i> чудных..."

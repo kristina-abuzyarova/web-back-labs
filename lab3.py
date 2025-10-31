@@ -81,7 +81,7 @@ def success():
 @lab3.route('/lab3/settings')
 def settings():
     current_color = request.cookies.get('color', '#000000')
-    current_bg_color = request.cookies.get('bg_color', '#ffffff')
+    current_bg_color = request.cookies.get('bg_color', "#68a7cc")
     current_font_size = request.cookies.get('font_size', '16')
     current_font_family = request.cookies.get('font_family', 'Arial, sans-serif')
 
@@ -179,6 +179,15 @@ def ticket():
                          destination=destination, date=date, insurance=insurance,
                          ticket_type=ticket_type, total_price=total_price)
 
+
+@lab3.route('/lab3/clear_settings')
+def clear_settings():
+    resp = make_response(redirect('/lab3/settings'))
+    resp.set_cookie('color', '', expires=0)
+    resp.set_cookie('bg_color', '', expires=0)
+    resp.set_cookie('font_size', '', expires=0)
+    resp.set_cookie('font_family', '', expires=0)
+    
     return resp
 
 products = [
@@ -279,3 +288,10 @@ def products_search():
                          real_max_price=real_max_price,
                          filtered_count=len(products),
                          total_count=len(products))
+@app.route('/lab3/')
+def lab3():
+    name = request.cookies.get('name', 'Гость')
+    name_color = request.cookies.get('name_color', 'black')
+    return render_template('lab3.html', 
+                         name=name, 
+                         name_color=name_color)

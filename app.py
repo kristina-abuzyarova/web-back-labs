@@ -6,6 +6,9 @@ from lab3 import lab3
 from lab4 import lab4
 
 app = Flask(__name__)
+
+app.secret_key = 'секретно-секретный секрет'
+
 app.register_blueprint(lab1)
 app.register_blueprint(lab2)
 app.register_blueprint(lab3)
@@ -25,14 +28,14 @@ def index():
     </head>
     <body>
         <header><h1>НГТУ, ФБ, WEB-программирование, часть 2. Список лабораторных</h1></header>
-        <nav>
-            <ul>
-                <li><a href="/lab1">Первая лабораторная</a></li>
-                <li><a href="/lab2">Вторая лабораторная</a></li>
-                <li><a href="/lab3">Третья лабораторная</a></li>
-                <li><a href="/lab4">Четвертая лабораторная</a></li>
-            </ul>
-        </nav>
+            <nav class="main-page-nav">
+              <ul>
+              <li><a href="/lab1">Первая лабораторная</a></li>
+              <li><a href="/lab2">Вторая лабораторная</a></li>
+              <li><a href="/lab3">Третья лабораторная</a></li>
+              <li><a href="/lab4">Четвертая лабораторная</a></li>
+              </ul>
+            </nav>
         <footer>
             <p>Абузярова Кристина Руслановна, ФБИ-34, 3 курс, 2025</p>
         </footer>

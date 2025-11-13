@@ -2,6 +2,7 @@ from flask import Blueprint, render_template, request, redirect, session
 lab5 = Blueprint('lab5', __name__)
 import psycopg2
 from psycopg2.extras import RealDictCursor
+from werkzeug.security import check_password_hash, generate_password_hash
 
 
 @lab5.route('/lab5/')
@@ -38,6 +39,12 @@ def register():
     try:
         conn, cur = db_connect()
 
+        try:
+            cur.execute("GRANT ALL PRIVILEGES ON TABLE users TO kristina_abuzyarova_knowledge_base")
+            cur.execute("GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO kristina_abuzyarova_knowledge_base")
+        except:
+            pass  
+
         cur.execute("""
             CREATE TABLE IF NOT EXISTS users (
                 id SERIAL PRIMARY KEY,
@@ -52,7 +59,8 @@ def register():
             return render_template('lab5/register.html',
                                 error="Такой пользователь уже существует")
         
-        cur.execute("INSERT INTO users (login, password) VALUES (%s, %s)", (login, password))
+        password_hash = generate_password_hash(password)
+        cur.execute("INSERT INTO users (login, password) VALUES (%s, %s)", (login, password_hash))
 
         db_close(conn, cur)
         
@@ -86,7 +94,7 @@ def login():
             return render_template('lab5/login.html',
                                 error='Логин и/или пароль неверны')
         
-        if user['password'] != password:
+        if not check_password_hash(user['password'], password):
             db_close(conn, cur)
             return render_template('lab5/login.html',
                                 error='Логин и/или пароль неверны')

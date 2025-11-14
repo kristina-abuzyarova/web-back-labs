@@ -288,17 +288,5 @@ def products_search():
                          real_max_price=real_max_price,
                          filtered_count=len(products),
                          total_count=len(products))
-@app.route('/lab3/')
-def lab3():
-    name = request.cookies.get('name', 'Гость')
-    name_color = request.cookies.get('name_color', 'black')
-    return render_template('lab3.html', 
-                         name=name, 
-                         name_color=name_color)
 
-@lab3.route('/lab3/form1')
-def form1():
-    user = request.args.get('user')
-    age = request.args.get('age')
-    sex = request.args.get('sex')
-    return render_template('lab3/form1.html', user=user, age=age, sex=sex)
+

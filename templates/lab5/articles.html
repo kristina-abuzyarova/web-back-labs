@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Мои статьи</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
+</head>
+<body>
+    <h1>Мои статьи</h1>
+    <p>Добро пожаловать, {{ username }}!</p>
+    
+    <a href="{{ url_for('lab5.create') }}">Создать новую статью</a>
+    <a href="{{ url_for('lab5.lab') }}">На главную</a>
+    <a href="{{ url_for('lab5.logout') }}">Выйти</a>
+    
+    {% if error %}
+        <p style="color: red;">{{ error }}</p>
+    {% endif %}
+    
+    {% if articles %}
+        {% for article in articles %}
+            <div style="border: 1px solid #ccc; margin: 10px; padding: 10px;">
+                <h3>{{ article.title }}</h3>
+                <p>{{ article.article_text }}</p>
+                <small>Создано: {{ article.created_at }}</small>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>У вас пока нет статей.</p>
+    {% endif %}
+</body>
+</html>

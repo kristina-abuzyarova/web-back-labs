@@ -203,3 +203,21 @@ def articles():
 @lab5.route('/lab5/list')
 def list_redirect():
     return redirect(url_for('lab5.articles'))
+    
+
+@lab5.route('/lab5/list')
+def list():
+    login = session.get('login')
+    if not login:
+        return redirect('/lab5/login')
+    
+    conn, cur = db_connect()
+
+    cur.execute(f"SELECT id FROM users WHERE login='{login}';")
+    user_id = cur.fetchone()["id"]
+
+    cur.execute(f"SELECT * FROM articles WHERE user_id='{user_id}';")
+    articles = cur.fetchall()
+
+    db_close(conn, cur)
+    return render_template('/lab5/articles.html', articles=articles)

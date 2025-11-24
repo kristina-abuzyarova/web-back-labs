@@ -1,8 +1,9 @@
 from flask import Blueprint, render_template, request, redirect, session, url_for
-lab5 = Blueprint('lab5', __name__)
+from werkzeug.security import check_password_hash, generate_password_hash
 import psycopg2
 from psycopg2.extras import RealDictCursor
-from werkzeug.security import check_password_hash, generate_password_hash
+
+lab5 = Blueprint('lab5', __name__)
 
 def init_db():
     """Инициализация базы данных с созданием таблиц"""
@@ -155,7 +156,7 @@ def register():
 
         print(f" Добавляем пользователя: {login}")
         password_hash = generate_password_hash(password)
-        cur.execute("INSERT INTO users (login, password) VALUES (%s, %s);", (login, password_hash))
+        cur.execute("INSERT INTO users (login, password) VALUES (%s, %s)", (login, password_hash))
         conn.commit()
 
         print(f" Пользователь {login} добавлен в БД")
@@ -181,12 +182,12 @@ def login():
     password = request.form.get('password')
 
     if not (login and password):
-        return render_template('lab5/login.html', error="Заполните поля")
+        return render_template('lab5/login.html', error="Заполните все поля")
 
     try:
         conn, cur = db_connect()
 
-        cur.execute("SELECT * FROM users WHERE login=%s;", (login, ))
+        cur.execute("SELECT * FROM users WHERE login = %s", (login,))
         user = cur.fetchone()
 
         print(f"=== ОТЛАДКА ЛОГИНА ===")
@@ -240,7 +241,7 @@ def create():
     try:
         conn, cur = db_connect()
 
-        cur.execute(f"SELECT id FROM users WHERE login = %s;", (login,))
+        cur.execute("SELECT id FROM users WHERE login = %s", (login,))
         user = cur.fetchone()
         
         if not user:
@@ -267,17 +268,9 @@ def create():
     
     except psycopg2.Error as e:
         print(f" Ошибка PostgreSQL при создании статьи: {e}")
-        try:
-            conn.close()
-        except:
-            pass
         return render_template('lab5/create_article.html', error=f'Ошибка базы данных: {str(e)}')
     except Exception as e:
         print(f" Общая ошибка при создании статьи: {e}")
-        try:
-            conn.close()
-        except:
-            pass
         return render_template('lab5/create_article.html', error=f'Ошибка: {str(e)}')
 
 @lab5.route('/lab5/my_articles')
@@ -312,25 +305,9 @@ def my_articles():
     
     except Exception as e:
         print(f" Ошибка при получении статей: {e}")
-        try:
-            conn.close()
-        except:
-            pass
         return f"<h1>Ошибка</h1><p>Ошибка при загрузке статей: {str(e)}</p><a href='/lab5/'>На главную</a>"
 
 @lab5.route('/lab5/list')
-def list():
-    login = session.get('login')
-    if not login:
-        return redirect('/lab5/login')
-    
-    conn, cur = db_connect()
-
-    cur.execute(f"SELECT id FROM users WHERE login='{login}';")
-    user_id = cur.fetchone()["id"]
-
-    cur.execute(f"SELECT * FROM articles WHERE user_id='{user_id}';")
-    articles = cur.fetchall()
-
-    db_close(conn, cur)
-    return render_template('/lab5/articles.html', articles=articles)    
+def list_redirect():
+    """Редирект со старого URL на новый"""
+    return redirect(url_for('lab5.my_articles'))

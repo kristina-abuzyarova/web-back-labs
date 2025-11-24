@@ -155,7 +155,7 @@ def register():
 
         print(f" Добавляем пользователя: {login}")
         password_hash = generate_password_hash(password)
-        cur.execute("INSERT INTO users (login, password) VALUES (%s, %s)", (login, password_hash))
+        cur.execute("INSERT INTO users (login, password) VALUES (%s, %s);", (login, password_hash))
         conn.commit()
 
         print(f" Пользователь {login} добавлен в БД")
@@ -186,7 +186,7 @@ def login():
     try:
         conn, cur = db_connect()
 
-        cur.execute("SELECT * FROM users WHERE login = %s", (login,))
+        cur.execute("SELECT * FROM users WHERE login=%s;", (login, ))
         user = cur.fetchone()
 
         print(f"=== ОТЛАДКА ЛОГИНА ===")
@@ -240,7 +240,7 @@ def create():
     try:
         conn, cur = db_connect()
 
-        cur.execute("SELECT id FROM users WHERE login = %s", (login,))
+        cur.execute(f"SELECT id FROM users WHERE login = %s;", (login,))
         user = cur.fetchone()
         
         if not user:

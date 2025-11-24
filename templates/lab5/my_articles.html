@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Мои статьи</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Мои статьи</h1>
+        <p>Пользователь: {{ username }}</p>
+        
+        {% if articles %}
+            {% for article in articles %}
+            <div class="article" style="border: 1px solid #ccc; padding: 15px; margin: 10px 0; border-radius: 5px;">
+                <h3>{{ article.title }}</h3>
+                <p style="white-space: pre-wrap;">{{ article.article_text }}</p>
+                {% if article.created_at %}
+                <small>Дата создания: {{ article.created_at.strftime('%d.%m.%Y %H:%M') }}</small>
+                {% endif %}
+            </div>
+            {% endfor %}
+        {% else %}
+            <p>У вас пока нет статей. <a href="{{ url_for('lab5.create') }}">Создайте первую статью!</a></p>
+        {% endif %}
+        
+        <div style="margin-top: 20px;">
+            <a href="{{ url_for('lab5.lab') }}">На главную</a> | 
+            <a href="{{ url_for('lab5.create') }}">Создать статью</a>
+        </div>
+    </div>
+</body>
+</html>

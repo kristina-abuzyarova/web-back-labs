@@ -36,12 +36,26 @@ def init_db():
                     user_id INTEGER NOT NULL,
                     title VARCHAR(200) NOT NULL,
                     article_text TEXT NOT NULL,
+                    is_public BOOLEAN DEFAULT FALSE,
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 )
             ''')
             print(" Таблица user_articles создана/проверена")
         except Exception as e:
             print(f" Ошибка при создании user_articles: {e}")
+
+        # Добавляем поле is_public если его нет
+        try:
+            cur.execute("""
+                SELECT column_name 
+                FROM information_schema.columns 
+                WHERE table_name='user_articles' and column_name='is_public'
+            """)
+            if not cur.fetchone():
+                cur.execute("ALTER TABLE user_articles ADD COLUMN is_public BOOLEAN DEFAULT FALSE")
+                print(" Добавлено поле is_public в таблицу user_articles")
+        except Exception as e:
+            print(f" Ошибка при добавлении поля is_public: {e}")
 
         conn.commit()
         cur.close()
@@ -99,7 +113,8 @@ if not init_db():
 
 @lab5.route('/lab5/')
 def lab():
-    return render_template('lab5/lab5.html', username=session.get('login', 'anonymous'))
+    username = session.get('login', 'anonymous')
+    return render_template('lab5/lab5.html', username=username)
 
 def db_connect():
     try:
@@ -209,7 +224,7 @@ def login():
             return redirect(url_for('lab5.lab'))
         else:
             db_close(conn, cur)
-            return render_template('lab5/login.html', error="Неверный логин или пароль")
+            return render_template('lab5.login.html', error="Неверный логин или пароль")
 
     except psycopg2.Error as e:
         print(f" Ошибка PostgreSQL при входе: {e}")
@@ -220,7 +235,8 @@ def login():
 
 @lab5.route('/lab5/logout')
 def logout():
-    session.clear()
+    session.pop('login', None)
+    session.pop('user_id', None)
     return redirect(url_for('lab5.lab'))
 
 @lab5.route('/lab5/create', methods=['GET', 'POST'])
@@ -234,9 +250,13 @@ def create():
 
     title = request.form.get('title')
     article_text = request.form.get('article_text')
+    is_public = request.form.get('is_public') == 'true'
 
-    if not (title and article_text):
-        return render_template('lab5/create_article.html', error='Заполните все поля')
+    if not title or not article_text:
+        return render_template('lab5/create_article.html', error='Заполните название и текст статьи')
+
+    if len(title.strip()) == 0 or len(article_text.strip()) == 0:
+        return render_template('lab5/create_article.html', error='Название и текст статьи не могут быть пустыми')   
 
     try:
         conn, cur = db_connect()
@@ -254,16 +274,18 @@ def create():
         print(f"User ID: {user_id}")
         print(f"Title: {title}")
         print(f"Text length: {len(article_text)}")
+        print(f"Is public: {is_public}")
 
         cur.execute("""
-            INSERT INTO user_articles (user_id, title, article_text) 
-            VALUES (%s, %s, %s)
-        """, (user_id, title, article_text))
+            INSERT INTO user_articles (user_id, title, article_text, is_public) 
+            VALUES (%s, %s, %s, %s)
+        """, (user_id, title, article_text, is_public))
 
         conn.commit()
         print(f" Статья '{title}' успешно добавлена в таблицу user_articles")
         
         db_close(conn, cur)
+        print("=== РЕДИРЕКТ НА MY_ARTICLES ===")
         return redirect(url_for('lab5.my_articles')) 
     
     except psycopg2.Error as e:
@@ -287,7 +309,7 @@ def my_articles():
         print(f"Логин пользователя: {login}")
 
         cur.execute("""
-            SELECT id, title, article_text, created_at
+            SELECT id, title, article_text, is_public, created_at
             FROM user_articles 
             WHERE user_id = (SELECT id FROM users WHERE login = %s)
             ORDER BY created_at DESC
@@ -299,13 +321,95 @@ def my_articles():
 
         print(f" Итого найдено статей: {len(articles)}")
         for article in articles:
-            print(f"   - {article['title']}")
+            print(f"   - {article['title']} (ID: {article['id']}, Public: {article['is_public']})")
 
         return render_template('lab5/my_articles.html', articles=articles, username=login)
     
     except Exception as e:
         print(f" Ошибка при получении статей: {e}")
         return f"<h1>Ошибка</h1><p>Ошибка при загрузке статей: {str(e)}</p><a href='/lab5/'>На главную</a>"
+
+@lab5.route('/lab5/edit/<int:article_id>', methods=['GET', 'POST'])
+def edit_article(article_id):
+    """Редактирование статьи"""
+    login = session.get('login')
+    if not login:
+        return redirect(url_for('lab5.login'))
+
+    try:
+        conn, cur = db_connect()
+
+        cur.execute("""
+            SELECT ua.* 
+            FROM user_articles ua 
+            JOIN users u ON ua.user_id = u.id 
+            WHERE ua.id = %s AND u.login = %s
+        """, (article_id, login))
+        
+        article = cur.fetchone()
+        
+        if not article:
+            db_close(conn, cur)
+            return "Статья не найдена или у вас нет прав для её редактирования", 403
+
+        if request.method == 'GET':
+            db_close(conn, cur)
+            return render_template('lab5/edit_article.html', article=article)
+
+        title = request.form.get('title')
+        article_text = request.form.get('article_text')
+        is_public = request.form.get('is_public') == 'true'
+
+        if not title or not article_text:
+            return render_template('lab5/edit_article.html', article=article, error='Заполните название и текст статьи')
+
+        cur.execute("""
+            UPDATE user_articles 
+            SET title = %s, article_text = %s, is_public = %s
+            WHERE id = %s
+        """, (title, article_text, is_public, article_id))
+
+        conn.commit()
+        db_close(conn, cur)
+
+        return redirect(url_for('lab5.my_articles'))
+
+    except Exception as e:
+        print(f" Ошибка при редактировании статьи: {e}")
+        return f"Ошибка при редактировании статьи: {str(e)}"
+
+@lab5.route('/lab5/delete/<int:article_id>', methods=['POST'])
+def delete_article(article_id):
+    """Удаление статьи"""
+    login = session.get('login')
+    if not login:
+        return redirect(url_for('lab5.login'))
+
+    try:
+        conn, cur = db_connect()
+
+        cur.execute("""
+            SELECT ua.* 
+            FROM user_articles ua 
+            JOIN users u ON ua.user_id = u.id 
+            WHERE ua.id = %s AND u.login = %s
+        """, (article_id, login))
+        
+        article = cur.fetchone()
+        
+        if not article:
+            db_close(conn, cur)
+            return "Статья не найдена или у вас нет прав для её удаления", 403
+
+        cur.execute("DELETE FROM user_articles WHERE id = %s", (article_id,))
+        conn.commit()
+        db_close(conn, cur)
+
+        return redirect(url_for('lab5.my_articles'))
+
+    except Exception as e:
+        print(f" Ошибка при удалении статьи: {e}")
+        return f"Ошибка при удалении статьи: {str(e)}"
 
 @lab5.route('/lab5/list')
 def list_redirect():

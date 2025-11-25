@@ -8,7 +8,7 @@
 </head>
 <body>
     <header>
-        <h1>Создание статьи</h1>
+        <h1>Создать новую статью</h1>
         <a href="{{ url_for('lab5.my_articles') }}">← Назад к моим статьям</a>
     </header>
 
@@ -20,12 +20,12 @@
             
             <div class="form-section">
                 <h3>Название статьи:</h3>
-                <input type="text" name="title" required class="title-input" placeholder="Введите название статьи">
+                <input type="text" name="title" required class="title-input">
             </div>
 
             <div class="form-section">
                 <h3>Текст статьи:</h3>
-                <textarea name="article_text" rows="6" required class="text-input" placeholder="Введите текст статьи"></textarea>
+                <textarea name="article_text" rows="6" required class="text-input"></textarea>
             </div>
 
             <hr>
@@ -37,7 +37,7 @@
                         <label for="is_public" class="option-label">Сделать статью публичной</label>
                     </li>
                     <li class="option-item">
-                        <button type="submit" class="option-button">Готово</button>
+                        <button type="submit" class="option-button">Создать статью</button>
                     </li>
                     <li class="option-item">
                         <a href="{{ url_for('lab5.my_articles') }}" class="option-button cancel-button">Отмена</a>

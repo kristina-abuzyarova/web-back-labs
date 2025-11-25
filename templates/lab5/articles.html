@@ -1,35 +1,3 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Мои статьи</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
-</head>
-<body>
-    <h1>Мои статьи</h1>
-    <p>Добро пожаловать, {{ username }}!</p>
-    
-    <a href="{{ url_for('lab5.create') }}">Создать новую статью</a>
-    <a href="{{ url_for('lab5.lab') }}">На главную</a>
-    <a href="{{ url_for('lab5.logout') }}">Выйти</a>
-    
-    {% if error %}
-        <p style="color: red;">{{ error }}</p>
-    {% endif %}
-    
-    {% if articles %}
-        {% for article in articles %}
-            <div style="border: 1px solid #ccc; margin: 10px; padding: 10px;">
-                <h3>{{ article.title }}</h3>
-                <p>{{ article.article_text }}</p>
-                <small>Создано: {{ article.created_at }}</small>
-            </div>
-        {% endfor %}
-    {% else %}
-        <p>У вас пока нет статей.</p>
-    {% endif %}
-</body>
-</html>
-
 {% extends "base.html" %}
 
 {% block lab %}Лабораторная работа 5{% endblock %}
@@ -51,6 +19,7 @@
         font-weight: 500;
         transition: all 0.3s ease;
         border: 2px solid transparent;
+        cursor: pointer;
     }
 
     .btn-edit {
@@ -65,18 +34,27 @@
         border-color: #c82333;
     }
 
+    .btn-favorite {
+        background: linear-gradient(135deg, #ffd700, #ffa500);
+        color: #000;
+        border: 2px solid #ffa500;
+    }
+
+    .btn-favorite:hover {
+        background: linear-gradient(135deg, #ffa500, #ff8c00);
+        transform: scale(1.05);
+    }
+
+    .btn-unfavorite {
+        background: linear-gradient(135deg, #cccccc, #999999);
+        color: white;
+        border: 2px solid #999999;
+    }
+
     .actions {
         display: flex;
         gap: 10px;
         margin: 15px 0;
-    }
-
-    .btn {
-        padding: 10px 20px;
-        text-decoration: none;
-        border-radius: 5px;
-        font-size: 14px;
-        border: 2px solid;
     }
 
     .btn-primary {
@@ -89,6 +67,41 @@
         background-color: #f1f1f1;
         color: black;
         border-color: #ddd;
+    }
+
+    .article-card {
+        border: 1px solid #ccc;
+        margin: 10px 0;
+        padding: 15px;
+        border-radius: 8px;
+    }
+
+    .article-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .badge {
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 12px;
+        font-weight: bold;
+    }
+
+    .badge.public {
+        background-color: #4CAF50;
+        color: white;
+    }
+
+    .badge.private {
+        background-color: #ff9800;
+        color: white;
+    }
+
+    .badge.featured {
+        background-color: #ffd700;
+        color: black;
     }
     </style>
 
@@ -108,13 +121,23 @@
                         <div class="article-header">
                             <h3>{{ article.title }}</h3>
                             <div class="article-actions">
+                                {% if article.is_featured %}
+                                    <form action="/lab5/unfavorite/{{ article.id }}" method="POST" style="display: inline;">
+                                        <button type="submit" class="btn btn-unfavorite">★ Убрать из избранного</button>
+                                    </form>
+                                {% else %}
+                                    <form action="/lab5/favorite/{{ article.id }}" method="POST" style="display: inline;">
+                                        <button type="submit" class="btn btn-favorite">⭐ В избранное</button>
+                                    </form>
+                                {% endif %}
+                                
                                 <a href="/lab5/edit/{{ article.id }}" class="btn btn-edit">Редактировать</a>
                                 <a href="/lab5/delete/{{ article.id }}" class="btn btn-delete" 
                                 onclick="return confirm('Вы уверены, что хотите удалить эту статью?')">Удалить</a>
                             </div>
                         </div>
                         <div class="article-content">
-                            <p>{{ article.article_text[:200] }}{% if article.article_text|length > 200 %}...{% endif %}</p>
+                            <p>{{ article.article_text }}</p>
                         </div>
                         <div class="article-footer">
                             <span class="article-meta">
@@ -122,6 +145,10 @@
                                     <span class="badge public">Публичная</span>
                                 {% else %}
                                     <span class="badge private">Приватная</span>
+                                {% endif %}
+                                
+                                {% if article.is_featured %}
+                                    <span class="badge featured">★ Избранная</span>
                                 {% endif %}
                             </span>
                         </div>
@@ -134,5 +161,17 @@
                 <a href="/lab5/" class="btn btn-secondary">На главную</a>
             </div>
         {% endif %}
-    
+    </div>
+
+    <script>
+        document.querySelectorAll('.btn').forEach(btn => {
+            btn.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-2px)';
+            });
+            
+            btn.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+            });
+        });
+    </script>
 {% endblock %}

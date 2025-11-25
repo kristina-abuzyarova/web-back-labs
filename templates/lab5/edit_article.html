@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Создать статью</title>
+    <title>Редактировать статью</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
 </head>
 <body>
     <header>
-        <h1>Создать новую статью</h1>
+        <h1>Редактирование статьи</h1>
         <a href="{{ url_for('lab5.my_articles') }}">← Назад к моим статьям</a>
     </header>
 
@@ -20,12 +20,21 @@
             
             <div class="form-section">
                 <h3>Название статьи:</h3>
-                <input type="text" name="title" required class="title-input">
+                <input type="text" name="title" value="{{ article.title }}" required class="title-input">
             </div>
+
+            <div class="current-text">
+                <h3>Текущий текст статьи:</h3>
+                <div class="text-preview">
+                    {{ article.article_text }}
+                </div>
+            </div>
+
+            <hr>
 
             <div class="form-section">
                 <h3>Текст статьи:</h3>
-                <textarea name="article_text" rows="6" required class="text-input"></textarea>
+                <textarea name="article_text" rows="6" required class="text-input">{{ article.article_text }}</textarea>
             </div>
 
             <hr>
@@ -33,11 +42,11 @@
             <div class="form-options">
                 <ul class="options-list">
                     <li class="option-item">
-                        <input type="checkbox" id="is_public" name="is_public" value="true">
+                        <input type="checkbox" id="is_public" name="is_public" value="true" {% if article.is_public %}checked{% endif %}>
                         <label for="is_public" class="option-label">Сделать статью публичной</label>
                     </li>
                     <li class="option-item">
-                        <button type="submit" class="option-button">Создать статью</button>
+                        <button type="submit" class="option-button">Сохранить изменения</button>
                     </li>
                     <li class="option-item">
                         <a href="{{ url_for('lab5.my_articles') }}" class="option-button cancel-button">Отмена</a>

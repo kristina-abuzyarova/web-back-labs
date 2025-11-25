@@ -1,4 +1,4 @@
-from flask import Flask, url_for, request
+from flask import Flask, url_for, request, render_template
 import os
 import datetime
 from dotenv import load_dotenv
@@ -184,12 +184,12 @@ def log_all_requests():
 
 @app.route("/bad_request")
 def bad_request():
-    return '''
+    return f'''
 <!doctype html>
 <html>
     <head>
         <title>400 Bad Request</title>
-        <link rel="stylesheet" href="''' + url_for('static', filename='lab1/lab1.css') + '''">
+        <link rel="stylesheet" href="{url_for('static', filename='lab1/lab1.css')}">
     </head>
     <body>
         <h1>400 Bad Request</h1>
@@ -201,12 +201,12 @@ def bad_request():
 
 @app.route("/unauthorized")
 def unauthorized():
-    return '''
+    return f'''
 <!doctype html>
 <html>
     <head>
         <title>401 Unauthorized</title>
-        <link rel="stylesheet" href="''' + url_for('static', filename='lab1/lab1.css') + '''">
+        <link rel="stylesheet" href="{url_for('static', filename='lab1/lab1.css')}">
     </head>
     <body>
         <h1>401 Unauthorized</h1>
@@ -218,12 +218,12 @@ def unauthorized():
 
 @app.route("/payment_required")
 def payment_required():
-    return '''
+    return f'''
 <!doctype html>
 <html>
     <head>
         <title>402 Payment Required</title>
-        <link rel="stylesheet" href="''' + url_for('static', filename='lab1/lab1.css') + '''">
+        <link rel="stylesheet" href="{url_for('static', filename='lab1/lab1.css')}">
     </head>
     <body>
         <h1>402 Payment Required</h1>
@@ -235,12 +235,12 @@ def payment_required():
 
 @app.route("/forbidden")
 def forbidden():
-    return '''
+    return f'''
 <!doctype html>
 <html>
     <head>
         <title>403 Forbidden</title>
-        <link rel="stylesheet" href="''' + url_for('static', filename='lab1/lab1.css') + '''">
+        <link rel="stylesheet" href="{url_for('static', filename='lab1/lab1.css')}">
     </head>
     <body>
         <h1>403 Forbidden</h1>
@@ -252,12 +252,12 @@ def forbidden():
 
 @app.route("/method_not_allowed")
 def method_not_allowed():
-    return '''
+    return f'''
 <!doctype html>
 <html>
     <head>
         <title>405 Method Not Allowed</title>
-        <link rel="stylesheet" href="''' + url_for('static', filename='lab1/lab1.css') + '''">
+        <link rel="stylesheet" href="{url_for('static', filename='lab1/lab1.css')}">
     </head>
     <body>
         <h1>405 Method Not Allowed</h1>
@@ -269,12 +269,12 @@ def method_not_allowed():
 
 @app.route("/teapot")
 def teapot():
-    return '''
+    return f'''
 <!doctype html>
 <html>
     <head>
         <title>418 I'm a teapot</title>
-        <link rel="stylesheet" href="''' + url_for('static', filename='lab1/lab1.css') + '''">
+        <link rel="stylesheet" href="{url_for('static', filename='lab1/lab1.css')}">
     </head>
     <body>
         <h1>418 I'm a teapot</h1>
@@ -286,37 +286,37 @@ def teapot():
 
 @app.errorhandler(500)
 def internal_server_error(err):
-    return '''
+    return f'''
 <!doctype html>
 <html>
     <head>
         <title>500 - Ошибка сервера</title>
-        <link rel="stylesheet" href="''' + url_for('static', filename='lab1/lab1.css') + '''">
+        <link rel="stylesheet" href="{url_for('static', filename='lab1/lab1.css')}">
         <style>
-            body {
+            body {{
                 text-align: center;
                 padding: 50px;
                 font-family: Arial, sans-serif;
                 background-color: #fff5f5;
-            }
-            h1 {
+            }}
+            h1 {{
                 font-size: 80px;
                 color: #e53e3e;
                 margin: 0;
-            }
-            h2 {
+            }}
+            h2 {{
                 color: #333;
                 margin: 20px 0;
-            }
-            .error-box {
+            }}
+            .error-box {{
                 background: white;
                 padding: 20px;
                 border-radius: 10px;
                 max-width: 600px;
                 margin: 20px auto;
                 border-left: 4px solid #e53e3e;
-            }
-            a {
+            }}
+            a {{
                 display: inline-block;
                 padding: 10px 20px;
                 background: grey;
@@ -324,10 +324,10 @@ def internal_server_error(err):
                 text-decoration: none;
                 border-radius: 5px;
                 margin: 10px;
-            }
-            a:hover {
+            }}
+            a:hover {{
                 background: black;
-            }
+            }}
         </style>
     </head>
     <body>
@@ -400,11 +400,11 @@ def index():
 
 @app.route("/http_codes")
 def http_codes():
-    return '''
+    return f'''
 <!doctype html>
 <html>
     <head>
-        <link rel="stylesheet" href="''' + url_for('static', filename='lab1/lab1.css') + '''">
+        <link rel="stylesheet" href="{url_for('static', filename='lab1/lab1.css')}">
         <title>Коды ответов HTTP</title>
     </head>
     <body>
@@ -420,4 +420,4 @@ def http_codes():
         </ul>
         <a href="/">На главную</a>
     </body>
-
+</html>'''

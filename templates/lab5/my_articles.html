@@ -1,32 +1,202 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Мои статьи</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
-</head>
-<body>
-    <div class="container">
-        <h1>Мои статьи</h1>
-        <p>Пользователь: {{ username }}</p>
-        
-        {% if articles %}
-            {% for article in articles %}
-            <div class="article" style="border: 1px solid #ccc; padding: 15px; margin: 10px 0; border-radius: 5px;">
-                <h3>{{ article.title }}</h3>
-                <p style="white-space: pre-wrap;">{{ article.article_text }}</p>
-                {% if article.created_at %}
-                <small>Дата создания: {{ article.created_at.strftime('%d.%m.%Y %H:%M') }}</small>
-                {% endif %}
-            </div>
-            {% endfor %}
-        {% else %}
-            <p>У вас пока нет статей. <a href="{{ url_for('lab5.create') }}">Создайте первую статью!</a></p>
-        {% endif %}
-        
-        <div style="margin-top: 20px;">
-            <a href="{{ url_for('lab5.lab') }}">На главную</a> | 
-            <a href="{{ url_for('lab5.create') }}">Создать статью</a>
+{% extends "base.html" %}
+
+{% block lab %}Лабораторная работа 5{% endblock %}
+
+{% block main %}
+<style>
+    .article-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 15px;
+        flex-wrap: wrap;
+    }
+
+    .btn {
+        padding: 8px 16px;
+        text-decoration: none;
+        border-radius: 6px;
+        font-size: 14px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        border: 2px solid transparent;
+        cursor: pointer;
+        display: inline-block;
+    }
+
+    .btn-edit {
+        background-color: #da5fa9;
+        color: white;
+        border-color: #ee3cc5;
+    }
+
+    .btn-delete {
+        background-color: #dc3545;
+        color: white;
+        border-color: #c82333;
+    }
+
+    .btn-favorite {
+        background: linear-gradient(135deg, #ffd700, #ffa500);
+        color: #000;
+        border: 2px solid #ffa500;
+    }
+
+    .btn-favorite:hover {
+        background: linear-gradient(135deg, #ffa500, #ff8c00);
+        transform: scale(1.05);
+    }
+
+    .btn-unfavorite {
+        background: linear-gradient(135deg, #cccccc, #999999);
+        color: white;
+        border: 2px solid #999999;
+    }
+
+    .actions {
+        display: flex;
+        gap: 10px;
+        margin: 15px 0;
+    }
+
+    .btn-primary {
+        background-color: #4CAF50;
+        color: white;
+        border-color: #45a049;
+    }
+
+    .btn-secondary {
+        background-color: #f1f1f1;
+        color: black;
+        border-color: #ddd;
+    }
+
+    .article-card {
+        border: 1px solid #ccc;
+        margin: 10px 0;
+        padding: 15px;
+        border-radius: 8px;
+        background-color: white;
+    }
+
+    .article-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .badge {
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 12px;
+        font-weight: bold;
+        margin-right: 5px;
+    }
+
+    .badge.public {
+        background-color: #4CAF50;
+        color: white;
+    }
+
+    .badge.private {
+        background-color: #ff9800;
+        color: white;
+    }
+
+    .badge.favorite {
+        background-color: #ffd700;
+        color: black;
+    }
+
+    .article-content {
+        margin: 10px 0;
+        line-height: 1.5;
+    }
+
+    .article-footer {
+        margin-top: 10px;
+        padding-top: 10px;
+        border-top: 1px solid #eee;
+    }
+
+    form {
+        display: inline;
+        margin: 0;
+    }
+
+    .no-articles {
+        text-align: center;
+        padding: 40px;
+        background-color: #f9f9f9;
+        border-radius: 8px;
+        margin: 20px 0;
+    }
+</style>
+
+<div class="container">
+    <h1>Мои статьи</h1>
+    
+    {% if error %}
+        <div style="color: red; margin: 10px 0; padding: 10px; background-color: #ffe6e6; border-radius: 5px;">
+            {{ error }}
         </div>
-    </div>
-</body>
-</html>
+    {% endif %}
+    
+    {% if no_articles %}
+        <div class="no-articles">
+            <h3>У вас пока нет статей</h3>
+            <p>Создайте свою первую статью!</p>
+            <a href="/lab5/create" class="btn btn-primary">Создать статью</a>
+        </div>
+    {% else %}
+        <div class="articles-list">
+            {% for article in articles %}
+                <div class="article-card">
+                    <div class="article-header">
+                        <h3 style="margin: 0; flex-grow: 1;">{{ article.title }}</h3>
+                        <div class="article-actions">
+                            {% if article.is_favorite %}
+                                <form action="/lab5/unfavorite/{{ article.id }}" method="POST">
+                                    <button type="submit" class="btn btn-unfavorite">★ Убрать из избранного</button>
+                                </form>
+                            {% else %}
+                                <form action="/lab5/favorite/{{ article.id }}" method="POST">
+                                    <button type="submit" class="btn btn-favorite">⭐ В избранное</button>
+                                </form>
+                            {% endif %}
+                            
+                            <a href="/lab5/edit/{{ article.id }}" class="btn btn-edit">Редактировать</a>
+                            <a href="/lab5/delete/{{ article.id }}" class="btn btn-delete" 
+                            onclick="return confirm('Вы уверены, что хотите удалить эту статью?')">Удалить</a>
+                        </div>
+                    </div>
+                    <div class="article-content">
+                        <p>{{ article.article_text }}</p>
+                    </div>
+                    <div class="article-footer">
+                        <span class="article-meta">
+                            {% if article.is_public %}
+                                <span class="badge public">Публичная</span>
+                            {% else %}
+                                <span class="badge private">Приватная</span>
+                            {% endif %}
+                            
+                            {% if article.is_favorite %}
+                                <span class="badge favorite">★ Избранная</span>
+                            {% endif %}
+                            
+                            <small>Создано: {{ article.created_at.strftime('%d.%m.%Y %H:%M') if article.created_at else 'Неизвестно' }}</small>
+                        </span>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        
+        <div class="actions">
+            <a href="/lab5/create" class="btn btn-primary">Создать новую статью</a>
+            <a href="/lab5/" class="btn btn-secondary">На главную</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

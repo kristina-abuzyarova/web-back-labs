@@ -8,7 +8,7 @@ for i in range(1, 11):
 
 @lab6.route('/lab6/')
 def main():
-    return render_template('lab6/lab6.html')
+    return render_template('lab6/lab6.html', login=session.get('login'))
 
 
 @lab6.route('/lab6/json-rpc-api/', methods = ['POST'])
@@ -33,6 +33,37 @@ def api():
             'id': id
         }
     
+    if data['method'] == 'cancellation':
+        office_number = data['params']
+        for office in offices:
+            if office['number'] == office_number:
+                if office['tenant'] == '':
+                    return {
+                        'jsonrpc': '2.0',
+                        'error': {
+                            'code': 3,
+                            'message': 'Office is not booked'
+                        },
+                        'id': id    
+                    }
+                
+                if office['tenant'] != login:
+                    return {
+                        'jsonrpc': '2.0',
+                        'error': {
+                            'code': 4,
+                            'message': 'You are not the tenant of this office'
+                        },
+                        'id': id    
+                    }
+                
+                office['tenant'] = ''
+                return {
+                    'jsonrpc': '2.0',
+                    'result': "success",  
+                    'id': id
+                }
+            
     if data['method'] == 'booking':
         office_number = data['params']
         for office in offices:

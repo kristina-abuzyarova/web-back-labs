@@ -1,9 +1,341 @@
-{% extends "base.html" %}
-
-{% block lab %}Лабораторная работа 7{% exdblock %}
-
-{% block script %}
-{% endblock %}
-
-{% block main %}
-{% endblock %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lab7 - REST API для фильмов</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='lab7/style.css') }}">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 3px solid #667eea;
+        }
+        
+        h1 {
+            color: #2c3e50;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .subtitle {
+            color: #7f8c8d;
+            font-size: 1.2em;
+        }
+        
+        .api-section {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 40px;
+            border-left: 5px solid #3498db;
+        }
+        
+        h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+        
+        .endpoint {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            border: 2px solid #e0e0e0;
+        }
+        
+        .method {
+            display: inline-block;
+            padding: 5px 15px;
+            background: #667eea;
+            color: white;
+            border-radius: 5px;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        
+        .url {
+            font-family: 'Courier New', monospace;
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 8px 12px;
+            border-radius: 5px;
+            display: inline-block;
+            margin: 5px 0;
+        }
+        
+        .examples {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .example-link {
+            display: block;
+            padding: 15px;
+            background: white;
+            border-radius: 10px;
+            text-decoration: none;
+            color: #2c3e50;
+            border: 2px solid #667eea;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .example-link:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        .films-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+        
+        .film-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+        
+        .film-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            border-color: #667eea;
+        }
+        
+        .film-header {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            padding: 20px;
+        }
+        
+        .film-title {
+            font-size: 1.3em;
+            margin-bottom: 5px;
+        }
+        
+        .film-year {
+            opacity: 0.9;
+            font-size: 0.9em;
+        }
+        
+        .film-body {
+            padding: 20px;
+        }
+        
+        .film-description {
+            color: #666;
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+        
+        .film-id {
+            display: inline-block;
+            padding: 5px 10px;
+            background: #ecf0f1;
+            border-radius: 5px;
+            font-size: 0.9em;
+            color: #7f8c8d;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .btn:hover {
+            background: #5a67d8;
+            transform: translateY(-2px);
+        }
+        
+        .test-btn {
+            margin-top: 20px;
+            text-align: center;
+        }
+        
+        .response-box {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            font-family: 'Courier New', monospace;
+            display: none;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 2px solid #ecf0f1;
+            color: #7f8c8d;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+            
+            .films-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .examples {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Lab7 - REST API для фильмов</h1>
+            <p class="subtitle">Демонстрация работы RESTful API на Flask</p>
+        </div>
+        
+        <div class="api-section">
+            <h2>📡 REST API Endpoints</h2>
+            
+            <div class="endpoint">
+                <span class="method">GET</span>
+                <div class="url">/lab7/rest-api/films/</div>
+                <p>Получить список всех фильмов в формате JSON</p>
+                <a href="/lab7/rest-api/films/" class="btn" target="_blank">Протестировать</a>
+            </div>
+            
+            <div class="endpoint">
+                <span class="method">GET</span>
+                <div class="url">/lab7/rest-api/films/&lt;id&gt;</div>
+                <p>Получить конкретный фильм по ID (0-4)</p>
+            </div>
+            
+            <h3 style="margin-top: 25px;">Примеры запросов:</h3>
+            <div class="examples">
+                <a href="/lab7/rest-api/films/0" class="example-link" target="_blank">
+                    🎬 Фильм 0<br>
+                    <small>Ferrari vs Lamborghini</small>
+                </a>
+                <a href="/lab7/rest-api/films/1" class="example-link" target="_blank">
+                    🏎️ Фильм 1<br>
+                    <small>Ford v Ferrari</small>
+                </a>
+                <a href="/lab7/rest-api/films/2" class="example-link" target="_blank">
+                    🏁 Фильм 2<br>
+                    <small>Rush</small>
+                </a>
+                <a href="/lab7/rest-api/films/3" class="example-link" target="_blank">
+                    🤖 Фильм 3<br>
+                    <small>The Iron Giant</small>
+                </a>
+                <a href="/lab7/rest-api/films/4" class="example-link" target="_blank">
+                    👊 Фильм 4<br>
+                    <small>Real Steel</small>
+                </a>
+            </div>
+        </div>
+        
+        <div class="api-section">
+            <h2>🎥 Список фильмов в базе данных</h2>
+            <p>Всего фильмов: {{ films|length }}</p>
+            
+            <div class="films-grid">
+                {% for film in films %}
+                <div class="film-card">
+                    <div class="film-header">
+                        <div class="film-title">{{ film.title_ru }}</div>
+                        <div class="film-year">{{ film.year }}</div>
+                    </div>
+                    <div class="film-body">
+                        <p class="film-description">{{ film.description }}</p>
+                        <div class="film-id">ID: {{ film.id }}</div>
+                        <div style="margin-top: 15px;">
+                            <a href="/lab7/rest-api/films/{{ film.id }}" class="btn" target="_blank">
+                                Получить JSON
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <div class="test-btn">
+            <button onclick="testAPI()" class="btn">🧪 Протестировать API</button>
+            <div id="response" class="response-box"></div>
+        </div>
+        
+        <footer>
+            <p>Lab7 - REST API демонстрация | Flask Web Framework</p>
+            <p><a href="/" style="color: #667eea;">← Вернуться на главную</a></p>
+        </footer>
+    </div>
+    
+    <script>
+        async function testAPI() {
+            const responseBox = document.getElementById('response');
+            responseBox.style.display = 'block';
+            responseBox.innerHTML = '⏳ Загружаем данные...';
+            
+            try {
+                const response = await fetch('/lab7/rest-api/films/');
+                const data = await response.json();
+                
+                responseBox.innerHTML = 
+                    '✅ Успешный ответ от API:\n\n' +
+                    JSON.stringify(data, null, 2);
+                    
+            } catch (error) {
+                responseBox.innerHTML = 
+                    '❌ Ошибка при запросе к API:\n\n' +
+                    error.toString();
+            }
+        }
+    </script>
+</body>
+</html>

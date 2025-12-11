@@ -1,4 +1,4 @@
-from flask import Flask, url_for, request, render_template
+from flask import Flask, url_for, request, render_template, jsonify
 import os
 import datetime
 from dotenv import load_dotenv
@@ -9,7 +9,6 @@ from lab3 import lab3
 from lab4 import lab4
 from lab5 import lab5
 from lab6 import lab6
-from lab7 import lab7
 
 app = Flask(__name__)
 
@@ -24,13 +23,21 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db.init_app(app)
 
+# Регистрируем существующие blueprints
 app.register_blueprint(lab1)
 app.register_blueprint(lab2)
 app.register_blueprint(lab3)
 app.register_blueprint(lab4)
 app.register_blueprint(lab5)
 app.register_blueprint(lab6)
-app.register_blueprint(lab7)
+
+# Пробуем зарегистрировать lab7, если есть
+try:
+    from lab7 import lab7 as lab7_bp
+    app.register_blueprint(lab7_bp, url_prefix='/lab7')
+    print("✓ Blueprint lab7 зарегистрирован")
+except ImportError as e:
+    print(f"⚠ lab7 не найден: {e}")
 
 access_log = []
 
@@ -50,6 +57,179 @@ with app.app_context():
         db.session.commit()
         print("База данных инициализирована с офисами")
 
+
+# ========== ПРЯМЫЕ МАРШРУТЫ ДЛЯ LAB7 ==========
+# (работают даже если lab7.py не существует)
+
+@app.route('/lab7/')
+def lab7_index():
+    return '''
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lab7 - REST API для фильмов</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: Arial, sans-serif; 
+            line-height: 1.6; 
+            background: #f4f4f4;
+            padding: 20px;
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 { 
+            color: #2c3e50; 
+            margin-bottom: 20px;
+            text-align: center;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        .api-info {
+            margin-top: 30px;
+            padding: 20px;
+            background: #ecf0f1;
+            border-radius: 5px;
+        }
+        h2 { color: #34495e; margin: 20px 0 15px 0; }
+        ul { margin-left: 20px; margin-bottom: 15px; }
+        li { margin-bottom: 8px; }
+        a { 
+            color: #2980b9; 
+            text-decoration: none;
+            font-weight: bold;
+        }
+        a:hover { color: #1a5276; text-decoration: underline; }
+        .film-card {
+            background: #fff;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border-left: 4px solid #e74c3c;
+        }
+        .test-btn {
+            text-align: center;
+            margin: 20px 0;
+        }
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #3498db;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .btn:hover {
+            background: #2980b9;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Lab7 - REST API для фильмов</h1>
+        
+        <div class="api-info">
+            <h2>🎬 REST API Endpoints:</h2>
+            <ul>
+                <li><a href="/lab7/api/films/">GET /lab7/api/films/</a> - Все фильмы (JSON)</li>
+                <li>GET /lab7/api/films/&lt;id&gt; - Конкретный фильм (id 0-4)</li>
+            </ul>
+            
+            <h3>Примеры запросов:</h3>
+            <ul>
+                <li><a href="/lab7/api/films/0">Фильм 0 - Ferrari vs Lamborghini</a></li>
+                <li><a href="/lab7/api/films/1">Фильм 1 - Ford v Ferrari</a></li>
+                <li><a href="/lab7/api/films/2">Фильм 2 - Rush</a></li>
+                <li><a href="/lab7/api/films/3">Фильм 3 - The Iron Giant</a></li>
+                <li><a href="/lab7/api/films/4">Фильм 4 - Real Steel</a></li>
+            </ul>
+        </div>
+        
+        <div class="test-btn">
+            <a href="/lab7/api/films/" class="btn">🧪 Протестировать API</a>
+        </div>
+        
+        <footer style="margin-top: 40px; text-align: center; color: #7f8c8d;">
+            <p><a href="/" style="color: #3498db;">← Вернуться на главную</a></p>
+            <p>&copy; Lab7 - REST API демонстрация</p>
+        </footer>
+    </div>
+</body>
+</html>
+'''
+
+# API endpoints для lab7
+films_db = [
+    {
+        "id": 0,
+        "title": "Ferrari vs Lamborghini",
+        "title_ru": "Феррари против Ламборгини",
+        "year": "2023",
+        "description": "История соперничества двух легендарных автомобильных брендов - Феррари и Ламборгини."
+    },
+    {
+        "id": 1,
+        "title": "Ford v Ferrari",
+        "title_ru": "Ford против Ferrari",
+        "year": "2019",
+        "description": "Американский автомобильный конструктор Кэрролл Шелби и британский гонщик Кен Майлз объединяются."
+    },
+    {
+        "id": 2,
+        "title": "Rush",
+        "title_ru": "Гонка",
+        "year": "2013",
+        "description": "История эпического соперничества двух гонщиков Формулы-1."
+    },
+    {
+        "id": 3,
+        "title": "The Iron Giant",
+        "title_ru": "Железный гигант",
+        "year": "1999",
+        "description": "В разгар холодной войны молодой мальчик находит гигантского металлического робота."
+    },
+    {
+        "id": 4,
+        "title": "Real Steel",
+        "title_ru": "Железный кулак",
+        "year": "2011",
+        "description": "В недалёком будущем боксёрские поединки проводятся между огромными роботами."
+    },
+]
+
+@app.route('/lab7/api/films/')
+def lab7_get_films():
+    return jsonify({
+        "success": True,
+        "count": len(films_db),
+        "films": films_db
+    })
+
+@app.route('/lab7/api/films/<int:film_id>')
+def lab7_get_film(film_id):
+    if 0 <= film_id < len(films_db):
+        return jsonify({
+            "success": True,
+            "film": films_db[film_id]
+        })
+    return jsonify({
+        "success": False,
+        "error": f"Фильм с ID {film_id} не найден",
+        "available_ids": list(range(len(films_db)))
+    }), 404
+
+
+# ========== ОСТАЛЬНОЙ КОД (без изменений) ==========
 
 @app.errorhandler(404)
 def not_found(err):
@@ -450,3 +630,6 @@ def http_codes():
         <a href="/">На главную</a>
     </body>
 </html>'''
+
+if __name__ == '__main__':
+    app.run(debug=True)

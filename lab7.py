@@ -1,10 +1,7 @@
-# lab7.py - Blueprint для лабораторной работы 7
 from flask import Blueprint, render_template, jsonify, abort
 
-# Создаем blueprint
 lab7_bp = Blueprint('lab7_bp', __name__, template_folder='templates')
 
-# Данные о фильмах
 films_data = [
     {
         "id": 0,
@@ -43,12 +40,10 @@ films_data = [
     },
 ]
 
-# Главная страница lab7
 @lab7_bp.route('/')
 def lab7_index():
     return render_template('lab7/index.html', films=films_data)
 
-# API: получить все фильмы
 @lab7_bp.route('/rest-api/films/')
 def get_all_films():
     return jsonify({
@@ -57,7 +52,6 @@ def get_all_films():
         "films": films_data
     })
 
-# API: получить фильм по ID
 @lab7_bp.route('/rest-api/films/<int:film_id>')
 def get_film_by_id(film_id):
     if 0 <= film_id < len(films_data):
@@ -66,3 +60,11 @@ def get_film_by_id(film_id):
             "film": films_data[film_id]
         })
     abort(404, description=f"Фильм с ID {film_id} не найден. Доступные ID: 0-{len(films_data)-1}")
+
+@lab7.route('/lab7/rest-api/films/<int:id>', methods=['DELETE'])
+def del_film(id):
+    if id < 0 or id >= len(films):
+        return jsonify({"error": "Фильм не найден"}), 404
+
+    del films[id]
+    return '', 204    

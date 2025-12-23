@@ -5,54 +5,228 @@
 {% block script %}
 <script src="{{ url_for('static', filename='lab7/main.js') }}"></script>
 <style>
-    .modal {
-        display: none;
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        background-color: white;
-        padding: 20px;
-        border-radius: 10px;
-        box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19);
-        z-index: 1000;
-        width: 80%;
-        max-width: 500px;
-    }
-    .error-message {
-        color: red;
-        font-size: 12px;
-        margin-top: 5px;
-    }
     table {
         width: 100%;
         border-collapse: collapse;
         margin: 20px 0;
+        background-color: white;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        border: 2px solid #e0e0e0;
     }
-    th, td {
-        border: 1px solid #ddd;
-        padding: 8px;
-        text-align: left;
+
+    thead {
+        background-color: #7e8cf6;
+        color: white;
     }
+
     th {
-        background-color: #f2f2f2;
+        padding: 15px;
+        text-align: left;
+        font-weight: bold;
+        border-bottom: 3px solid #7e8cf6;
     }
-    button {
-        margin: 2px;
-        padding: 5px 10px;
+
+    td {
+        padding: 12px 15px;
+        border-bottom: 1px solid #ecf0f1;
     }
-    label {
-        display: block;
-        margin-bottom: 10px;
+
+    tbody tr:hover {
+        background-color: #f8f9fa;
+        transition: background-color 0.3s ease;
     }
-    input, textarea {
+
+    tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 10px;
+    }
+
+    .action-buttons button {
+        padding: 8px 15px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: bold;
+        transition: all 0.3s ease;
+    }
+
+    .edit-btn {
+        background-color: #7e8cf6;
+        color: #333;
+    }
+
+    .delete-btn {
+        background-color: #7e8cf6;
+        color: white;
+    }
+
+    .action-buttons button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .add-film-btn {
+        background-color: #7e8cf6;
+        color: white;
+        border: none;
+        padding: 12px 25px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+        font-weight: bold;
+        transition: all 0.3s ease;
+        margin-top: 20px;
+    }
+
+    .add-film-btn:hover {
+        background-color: #6a7af5;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
         width: 100%;
-        padding: 5px;
-        margin-top: 5px;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 1000;
+        justify-content: center;
+        align-items: center;
     }
-    textarea {
-        height: 100px;
+
+    .modal-content {
+        background-color: white;
+        padding: 30px;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19);
+        width: 90%;
+        max-width: 500px;
+        max-height: 80vh;
+        overflow-y: auto;
+    }
+
+    .modal h2 {
+        margin-top: 0;
+        margin-bottom: 25px;
+        color: #333;
+        text-align: center;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-group label {
+        display: block;
+        font-weight: bold;
+        margin-bottom: 8px;
+        color: #333;
+    }
+
+    .hint {
+        font-weight: normal;
+        font-style: italic;
+        color: #666;
+        font-size: 0.9em;
+    }
+
+    .form-group input,
+    .form-group textarea {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        font-size: 16px;
+        font-family: inherit;
+        box-sizing: border-box;
+    }
+
+    .form-group textarea {
+        height: 120px;
         resize: vertical;
+        min-height: 80px;
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus {
+        outline: none;
+        border-color: #7e8cf6;
+        box-shadow: 0 0 0 2px rgba(126, 140, 246, 0.2);
+    }
+
+    .error-message {
+        color: red;
+        font-size: 14px;
+        margin-top: 5px;
+        min-height: 20px;
+    }
+
+    .modal-buttons {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        margin-top: 25px;
+    }
+
+    .modal-buttons button {
+        padding: 12px 25px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+        font-weight: bold;
+        transition: all 0.3s ease;
+        min-width: 100px;
+    }
+
+    .ok-btn {
+        background-color: #7e8cf6;
+        color: white;
+    }
+
+    .cancel-btn {
+        background-color: #7e8cf6;
+        color: #333;
+    }
+
+    .modal-buttons button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .modal-buttons button:active {
+        transform: translateY(0);
+    }
+
+    .filters {
+        margin-bottom: 20px;
+        display: flex;
+        gap: 15px;
+        align-items: center;
+    }
+
+    .filters input {
+        padding: 8px 12px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        font-size: 14px;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 40px;
+        color: #666;
+        font-style: italic;
     }
 </style>
 {% endblock %}
@@ -70,52 +244,57 @@
         </tr>
     </thead>
     <tbody id="film-list">
-        <!-- Фильмы будут добавлены через JavaScript -->
     </tbody>
 </table>
 
-<script>
-    // Запустить заполнение таблицы после загрузки страницы
-    document.addEventListener('DOMContentLoaded', fillFilmList);
-</script>
-
-<div style="margin-top: 20px;">
-    <button onclick="addFilm()">Добавить фильм</button>
+<div style="text-align: center; margin-top: 30px;">
+    <button class="add-film-btn" onclick="addFilm()">Добавить фильм</button>
 </div>
 
-<div class="modal">
-    <h2 id="modal-title">Добавить фильм</h2>
-    
-    <input type="hidden" id="id">
-    
-    <label>
-        Название фильма на русском:
-        <input type="text" id="title-ru">
-        <span id="title-ru-error" class="error-message"></span>
-    </label>
-    
-    <label>
-        Название фильма на оригинальном языке 
-        <i>(если фильм русский, то оставьте пустым):</i>
-        <input type="text" id="title">
-        <span id="title-error" class="error-message"></span>
-    </label>
-    
-    <label>
-        Год выпуска:
-        <input type="text" id="year">
-        <span id="year-error" class="error-message"></span>
-    </label>
-    
-    <label>
-        Описание:
-        <textarea id="description"></textarea>
-        <span id="description-error" class="error-message"></span>
-    </label>
-    
-    <div style="text-align: right; margin-top: 20px;">
-        <button onclick="sendFilm()">Ок</button>
-        <button onclick="cancel()">Отмена</button>
+<div class="modal" id="filmModal">
+    <div class="modal-content">
+        <h2 id="modal-title">Добавить фильм</h2>
+        
+        <input type="hidden" id="id">
+        
+        <div class="form-group">
+            <label for="title-ru">Название фильма на русском:</label>
+            <input type="text" id="title-ru" required>
+            <span id="title-ru-error" class="error-message"></span>
+        </div>
+        
+        <div class="form-group">
+            <label for="title">
+                Название фильма на оригинальном языке 
+                <span class="hint">(если фильм русский, то оставьте пустым)</span>:
+            </label>
+            <input type="text" id="title">
+            <span id="title-error" class="error-message"></span>
+        </div>
+        
+        <div class="form-group">
+            <label for="year">Год выпуска:</label>
+            <input type="number" id="year" min="1888" max="2100" required>
+            <span id="year-error" class="error-message"></span>
+        </div>
+        
+        <div class="form-group">
+            <label for="description">Описание:</label>
+            <textarea id="description" required></textarea>
+            <span id="description-error" class="error-message"></span>
+        </div>
+        
+        <div class="modal-buttons">
+            <button class="ok-btn" onclick="sendFilm()">Ок</button>
+            <button class="cancel-btn" onclick="cancel()">Отмена</button>
+        </div>
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('DOM загружен');
+        fillFilmList();
+    });
+</script>
 {% endblock %}

@@ -32,15 +32,6 @@ app.register_blueprint(lab5)
 app.register_blueprint(lab6)
 app.register_blueprint(lab7)
 
-try:
-    from lab7 import lab7_bp  
-    app.register_blueprint(lab7_bp, url_prefix='/lab7')
-    print("✓ Blueprint lab7_bp зарегистрирован с префиксом /lab7")
-    print("   Маршруты: /lab7/, /lab7/rest-api/films/, /lab7/rest-api/films/<id>")
-except ImportError as e:
-    print(f"⚠ Ошибка импорта lab7.py: {e}")
-    print("⚠ Используются fallback-маршруты для lab7")
-
 access_log = []
 
 with app.app_context():

@@ -105,6 +105,7 @@ function editFilm(id) {
 }
 
 function sendFilm() {
+    const id = document.getElementById('id').value;
     const film = {
         title: document.getElementById('title').value,
         title_ru: document.getElementById('title-ru').value,
@@ -112,14 +113,13 @@ function sendFilm() {
         description: document.getElementById('description').value
     }
 
-    const id = document.getElementById('id').value;
     let url = `/lab7/rest-api/films`;
     let method = 'POST';
 
     if (id) {
         url = `/lab7/rest-api/films/${id}`;
         method = 'PUT';
-        film.id = parseInt(id);
+        film.id = parseInt(id); 
     }
 
     fetch(url, {
@@ -127,9 +127,16 @@ function sendFilm() {
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify(film)
     })
-    .then(function () {
-        fillFilmList();
-        hideModal();
+    .then(function (response) {
+        return response.json();
+    })
+    .then(function (data) {
+        if (data.success) {
+            fillFilmList();
+            hideModal();
+        } else {
+            alert('Ошибка: ' + (data.error || 'Неизвестная ошибка'));
+        }
     })
     .catch(function (error) {
         console.error('Ошибка при сохранении фильма:', error);

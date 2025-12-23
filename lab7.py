@@ -1,6 +1,10 @@
-from flask import Blueprint, render_template, jsonify, abort, request
+from flask import Blueprint, render_template, request, jsonify, abort
 
-lab7_bp = Blueprint('lab7_bp', __name__, template_folder='templates')
+lab7 = Blueprint('lab7', __name__)
+
+@lab7.route('/lab7/')
+def main():
+    return render_template('lab7/index.html')
 
 films_data = [
     {
@@ -40,62 +44,45 @@ films_data = [
     },
 ]
 
-@lab7_bp.route('/')
-def lab7_index():
-    return render_template('lab7/index.html', films=films_data)
+@lab7.route('/lab7/rest-api/films/', methods=['GET'])
+def get_films():
+    return films
 
-@lab7_bp.route('/rest-api/films/')
-def get_all_films():
-    return jsonify({
-        "success": True,
-        "count": len(films_data),
-        "films": films_data
-    })
 
-@lab7_bp.route('/rest-api/films/<int:film_id>')
-def get_film_by_id(film_id):
-    if 0 <= film_id < len(films_data):
-        return jsonify({
-            "success": True,
-            "film": films_data[film_id]
-        })
-    abort(404, description=f"Фильм с ID {film_id} не найден. Доступные ID: 0-{len(films_data)-1}")
-
-@lab7_bp.route('/rest-api/films/<int:film_id>', methods=['DELETE'])
-def delete_film(film_id):
-    if film_id < 0 or film_id >= len(films_data):
+@lab7.route('/lab7/rest-api/films/<int:id>', methods=['GET'])
+def get_films_by_id(id):
+    if id < 0 or id >= len(films):
         return jsonify({"error": "Фильм не найден"}), 404
 
-    deleted_film = films_data.pop(film_id)
+    return jsonify(films[id])
 
-    for i, film in enumerate(films_data):
-        film["id"] = i
-    
-    return jsonify({
-        "success": True,
-        "message": f"Фильм '{deleted_film['title_ru']}' удален",
-        "remaining": len(films_data)
-    }), 200
 
-@lab7_bp.route('/rest-api/films/<int:film_id>', methods=['PUT'])
-def update_film(film_id):
-    if film_id < 0 or film_id >= len(films_data):
+@lab7.route('/lab7/rest-api/films/<int:id>', methods=['DELETE'])
+def del_film(id):
+    if id < 0 or id >= len(films):
         return jsonify({"error": "Фильм не найден"}), 404
 
-    data = request.get_json()
+    del films[id]
+    return '', 204
 
-    if not data:
-        return jsonify({"error": "Нет данных для обновления"}), 400
 
-    films_data[film_id].update({
-        "title": data.get("title", films_data[film_id]["title"]),
-        "title_ru": data.get("title_ru", films_data[film_id]["title_ru"]),
-        "year": data.get("year", films_data[film_id]["year"]),
-        "description": data.get("description", films_data[film_id]["description"])
-    })
+@lab7.route('/lab7/rest-api/films/<int:id>', methods=['PUT'])
+def put_film(id):
+    if id < 0 or id >= len(films):
+        return jsonify({"error": "Фильм не найден"}), 404
+
+    film = request.get_json()
+    film[id] = film
+    return films[id]
+
+@lab7.route('/lab7/rest-api/films/', methods=['POST'])
+def add_film():
+    film_data = request.get_json()
     
-    return jsonify({
-        "success": True,
-        "message": f"Фильм обновлен",
-        "film": films_data[film_id]
-    })
+    if not film_data:
+        return jsonify({"error": "Не предоставлены данные фильма"}), 400
+    
+    films.append(film_data)
+    
+    new_id = len(films) - 1
+    return jsonify({"id": new_id}), 201

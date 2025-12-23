@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, jsonify, abort
+from flask import Blueprint, render_template, jsonify, abort, request
 
 lab7_bp = Blueprint('lab7_bp', __name__, template_folder='templates')
 
@@ -61,10 +61,41 @@ def get_film_by_id(film_id):
         })
     abort(404, description=f"Фильм с ID {film_id} не найден. Доступные ID: 0-{len(films_data)-1}")
 
-@lab7.route('/lab7/rest-api/films/<int:id>', methods=['DELETE'])
-def del_film(id):
-    if id < 0 or id >= len(films):
+@lab7_bp.route('/rest-api/films/<int:film_id>', methods=['DELETE'])
+def delete_film(film_id):
+    if film_id < 0 or film_id >= len(films_data):
         return jsonify({"error": "Фильм не найден"}), 404
 
-    del films[id]
-    return '', 204    
+    deleted_film = films_data.pop(film_id)
+
+    for i, film in enumerate(films_data):
+        film["id"] = i
+    
+    return jsonify({
+        "success": True,
+        "message": f"Фильм '{deleted_film['title_ru']}' удален",
+        "remaining": len(films_data)
+    }), 200
+
+@lab7_bp.route('/rest-api/films/<int:film_id>', methods=['PUT'])
+def update_film(film_id):
+    if film_id < 0 or film_id >= len(films_data):
+        return jsonify({"error": "Фильм не найден"}), 404
+
+    data = request.get_json()
+
+    if not data:
+        return jsonify({"error": "Нет данных для обновления"}), 400
+
+    films_data[film_id].update({
+        "title": data.get("title", films_data[film_id]["title"]),
+        "title_ru": data.get("title_ru", films_data[film_id]["title_ru"]),
+        "year": data.get("year", films_data[film_id]["year"]),
+        "description": data.get("description", films_data[film_id]["description"])
+    })
+    
+    return jsonify({
+        "success": True,
+        "message": f"Фильм обновлен",
+        "film": films_data[film_id]
+    })

@@ -23,7 +23,6 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db.init_app(app)
 
-# Регистрируем существующие blueprints
 app.register_blueprint(lab1)
 app.register_blueprint(lab2)
 app.register_blueprint(lab3)
@@ -31,13 +30,14 @@ app.register_blueprint(lab4)
 app.register_blueprint(lab5)
 app.register_blueprint(lab6)
 
-# Пробуем зарегистрировать lab7, если есть
 try:
-    from lab7 import lab7 as lab7_bp
+    from lab7 import lab7_bp  
     app.register_blueprint(lab7_bp, url_prefix='/lab7')
-    print("✓ Blueprint lab7 зарегистрирован")
+    print("✓ Blueprint lab7_bp зарегистрирован с префиксом /lab7")
+    print("   Маршруты: /lab7/, /lab7/rest-api/films/, /lab7/rest-api/films/<id>")
 except ImportError as e:
-    print(f"⚠ lab7 не найден: {e}")
+    print(f"⚠ Ошибка импорта lab7.py: {e}")
+    print("⚠ Используются fallback-маршруты для lab7")
 
 access_log = []
 
@@ -58,18 +58,16 @@ with app.app_context():
         print("База данных инициализирована с офисами")
 
 
-# ========== ПРЯМЫЕ МАРШРУТЫ ДЛЯ LAB7 ==========
-# (работают даже если lab7.py не существует)
 
-@app.route('/lab7/')
-def lab7_index():
+@app.route('/lab7-fallback/')
+def lab7_fallback_index():
     return '''
 <!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lab7 - REST API для фильмов</title>
+    <title>Lab7 - Fallback (основной API не загружен)</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { 
@@ -88,11 +86,18 @@ def lab7_index():
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
         }
         h1 { 
-            color: #2c3e50; 
+            color: #e74c3c; 
             margin-bottom: 20px;
             text-align: center;
-            border-bottom: 2px solid #3498db;
+            border-bottom: 2px solid #e74c3c;
             padding-bottom: 10px;
+        }
+        .warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
         }
         .api-info {
             margin-top: 30px;
@@ -109,17 +114,6 @@ def lab7_index():
             font-weight: bold;
         }
         a:hover { color: #1a5276; text-decoration: underline; }
-        .film-card {
-            background: #fff;
-            padding: 15px;
-            margin: 10px 0;
-            border-radius: 5px;
-            border-left: 4px solid #e74c3c;
-        }
-        .test-btn {
-            text-align: center;
-            margin: 20px 0;
-        }
         .btn {
             display: inline-block;
             padding: 10px 20px;
@@ -128,108 +122,106 @@ def lab7_index():
             text-decoration: none;
             border-radius: 5px;
             font-weight: bold;
+            margin: 5px;
         }
         .btn:hover {
             background: #2980b9;
+        }
+        .btn-primary {
+            background: #3498db;
+        }
+        .btn-secondary {
+            background: #95a5a6;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Lab7 - REST API для фильмов</h1>
+        <h1>Lab7 - Fallback Mode</h1>
+        
+        <div class="warning">
+            <strong>⚠ Внимание:</strong> Основной модуль lab7.py не загружен или содержит ошибки.
+            <p>Используются упрощенные fallback-маршруты.</p>
+        </div>
         
         <div class="api-info">
-            <h2>🎬 REST API Endpoints:</h2>
+            <h2>🎬 Fallback REST API Endpoints:</h2>
             <ul>
-                <li><a href="/lab7/api/films/">GET /lab7/api/films/</a> - Все фильмы (JSON)</li>
-                <li>GET /lab7/api/films/&lt;id&gt; - Конкретный фильм (id 0-4)</li>
+                <li><a href="/lab7-fallback/api/films/">GET /lab7-fallback/api/films/</a> - Все фильмы (JSON)</li>
+                <li>GET /lab7-fallback/api/films/&lt;id&gt; - Конкретный фильм (id 0-2)</li>
             </ul>
             
             <h3>Примеры запросов:</h3>
             <ul>
-                <li><a href="/lab7/api/films/0">Фильм 0 - Ferrari vs Lamborghini</a></li>
-                <li><a href="/lab7/api/films/1">Фильм 1 - Ford v Ferrari</a></li>
-                <li><a href="/lab7/api/films/2">Фильм 2 - Rush</a></li>
-                <li><a href="/lab7/api/films/3">Фильм 3 - The Iron Giant</a></li>
-                <li><a href="/lab7/api/films/4">Фильм 4 - Real Steel</a></li>
+                <li><a href="/lab7-fallback/api/films/0">Фильм 0 - Test Film 1</a></li>
+                <li><a href="/lab7-fallback/api/films/1">Фильм 1 - Test Film 2</a></li>
+                <li><a href="/lab7-fallback/api/films/2">Фильм 2 - Test Film 3</a></li>
             </ul>
         </div>
         
-        <div class="test-btn">
-            <a href="/lab7/api/films/" class="btn">🧪 Протестировать API</a>
+        <div style="text-align: center; margin: 30px 0;">
+            <a href="/lab7/" class="btn btn-primary">Попробовать основной API</a>
+            <a href="/lab7-fallback/api/films/" class="btn btn-secondary">🧪 Протестировать Fallback API</a>
         </div>
         
         <footer style="margin-top: 40px; text-align: center; color: #7f8c8d;">
             <p><a href="/" style="color: #3498db;">← Вернуться на главную</a></p>
-            <p>&copy; Lab7 - REST API демонстрация</p>
+            <p>&copy; Lab7 - Fallback REST API демонстрация</p>
         </footer>
     </div>
 </body>
 </html>
 '''
 
-# API endpoints для lab7
-films_db = [
+fallback_films_db = [
     {
         "id": 0,
-        "title": "Ferrari vs Lamborghini",
-        "title_ru": "Феррари против Ламборгини",
+        "title": "Fallback Film 1",
+        "title_ru": "Запасной фильм 1",
         "year": "2023",
-        "description": "История соперничества двух легендарных автомобильных брендов - Феррари и Ламборгини."
+        "description": "Это fallback-фильм, пока основной модуль не загружен."
     },
     {
         "id": 1,
-        "title": "Ford v Ferrari",
-        "title_ru": "Ford против Ferrari",
-        "year": "2019",
-        "description": "Американский автомобильный конструктор Кэрролл Шелби и британский гонщик Кен Майлз объединяются."
+        "title": "Fallback Film 2",
+        "title_ru": "Запасной фильм 2",
+        "year": "2024",
+        "description": "Второй fallback-фильм для тестирования API."
     },
     {
         "id": 2,
-        "title": "Rush",
-        "title_ru": "Гонка",
-        "year": "2013",
-        "description": "История эпического соперничества двух гонщиков Формулы-1."
-    },
-    {
-        "id": 3,
-        "title": "The Iron Giant",
-        "title_ru": "Железный гигант",
-        "year": "1999",
-        "description": "В разгар холодной войны молодой мальчик находит гигантского металлического робота."
-    },
-    {
-        "id": 4,
-        "title": "Real Steel",
-        "title_ru": "Железный кулак",
-        "year": "2011",
-        "description": "В недалёком будущем боксёрские поединки проводятся между огромными роботами."
+        "title": "Fallback Film 3",
+        "title_ru": "Запасной фильм 3",
+        "year": "2025",
+        "description": "Третий fallback-фильм с тестовыми данными."
     },
 ]
 
-@app.route('/lab7/api/films/')
-def lab7_get_films():
+@app.route('/lab7-fallback/api/films/')
+def lab7_fallback_get_films():
     return jsonify({
         "success": True,
-        "count": len(films_db),
-        "films": films_db
+        "mode": "fallback",
+        "count": len(fallback_films_db),
+        "films": fallback_films_db,
+        "note": "Это fallback API. Основной модуль lab7.py не загружен."
     })
 
-@app.route('/lab7/api/films/<int:film_id>')
-def lab7_get_film(film_id):
-    if 0 <= film_id < len(films_db):
+@app.route('/lab7-fallback/api/films/<int:film_id>')
+def lab7_fallback_get_film(film_id):
+    if 0 <= film_id < len(fallback_films_db):
         return jsonify({
             "success": True,
-            "film": films_db[film_id]
+            "mode": "fallback",
+            "film": fallback_films_db[film_id],
+            "note": "Это fallback API. Основной модуль lab7.py не загружен."
         })
     return jsonify({
         "success": False,
+        "mode": "fallback",
         "error": f"Фильм с ID {film_id} не найден",
-        "available_ids": list(range(len(films_db)))
+        "available_ids": list(range(len(fallback_films_db)))
     }), 404
-
-
-# ========== ОСТАЛЬНОЙ КОД (без изменений) ==========
 
 @app.errorhandler(404)
 def not_found(err):

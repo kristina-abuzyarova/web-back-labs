@@ -5,20 +5,55 @@
 {% block script %}
 <script src="{{ url_for('static', filename='lab7/main.js') }}"></script>
 <style>
-.modal {
-    display: none;
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background-color: white;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19);
-    z-index: 1000;
-    width: 80%;
-    max-width: 500px;
-}
+    .modal {
+        display: none;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background-color: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19);
+        z-index: 1000;
+        width: 80%;
+        max-width: 500px;
+    }
+    .error-message {
+        color: red;
+        font-size: 12px;
+        margin-top: 5px;
+    }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 20px 0;
+    }
+    th, td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: left;
+    }
+    th {
+        background-color: #f2f2f2;
+    }
+    button {
+        margin: 2px;
+        padding: 5px 10px;
+    }
+    label {
+        display: block;
+        margin-bottom: 10px;
+    }
+    input, textarea {
+        width: 100%;
+        padding: 5px;
+        margin-top: 5px;
+    }
+    textarea {
+        height: 100px;
+        resize: vertical;
+    }
 </style>
 {% endblock %}
 
@@ -35,10 +70,12 @@
         </tr>
     </thead>
     <tbody id="film-list">
+        <!-- Фильмы будут добавлены через JavaScript -->
     </tbody>
 </table>
 
 <script>
+    // Запустить заполнение таблицы после загрузки страницы
     document.addEventListener('DOMContentLoaded', fillFilmList);
 </script>
 
@@ -47,29 +84,38 @@
 </div>
 
 <div class="modal">
-        <input type="hidden" id="id">
-        <label>
-            Название фильма на русском:
-            <input type="text" id="title-ru">
-        </label><br>
-
-        <label>
-            Название фильма на оригинальном языке 
-            <i>(если фильм русский, то оставьте пустым):</i>
-            <input type="text" id="title">
-        </label><br>
-
-        <label>
-            Год выпуска:
-            <input type="number" id="year">
-        </label><br>
-
-        <label>
-            Описание:
-            <textarea id="description"></textarea>
-        </label><br>
-
+    <h2 id="modal-title">Добавить фильм</h2>
+    
+    <input type="hidden" id="id">
+    
+    <label>
+        Название фильма на русском:
+        <input type="text" id="title-ru">
+        <span id="title-ru-error" class="error-message"></span>
+    </label>
+    
+    <label>
+        Название фильма на оригинальном языке 
+        <i>(если фильм русский, то оставьте пустым):</i>
+        <input type="text" id="title">
+        <span id="title-error" class="error-message"></span>
+    </label>
+    
+    <label>
+        Год выпуска:
+        <input type="text" id="year">
+        <span id="year-error" class="error-message"></span>
+    </label>
+    
+    <label>
+        Описание:
+        <textarea id="description"></textarea>
+        <span id="description-error" class="error-message"></span>
+    </label>
+    
+    <div style="text-align: right; margin-top: 20px;">
         <button onclick="sendFilm()">Ок</button>
         <button onclick="cancel()">Отмена</button>
     </div>
+</div>
 {% endblock %}

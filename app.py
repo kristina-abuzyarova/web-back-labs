@@ -9,6 +9,7 @@ from lab3 import lab3
 from lab4 import lab4
 from lab5 import lab5
 from lab6 import lab6
+from lab7 import lab7 
 
 app = Flask(__name__)
 
@@ -29,6 +30,7 @@ app.register_blueprint(lab3)
 app.register_blueprint(lab4)
 app.register_blueprint(lab5)
 app.register_blueprint(lab6)
+app.register_blueprint(lab7)
 
 try:
     from lab7 import lab7_bp  
@@ -546,7 +548,7 @@ def internal_server_error(err):
         
         <p style="margin-top: 30px; color: #999; font-size: 14px;">
             Если ошибка повторяется, свяжитесь с администратором: 
-            <a href="mailto:aalinkaaaaaaaaaaaa@vk.com" style="color: #333;">aalinkaaaaaaaaaaaa@vk.com</a>
+            <a href="mailto:kristina19283746@gmail.com" style="color: #333;">kristina19283746@gmail.com</a>
         </p>
     </body>
 </html>''', 500

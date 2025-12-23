@@ -131,6 +131,11 @@ def put_film(id):
             "errors": {"general": "Не предоставлены данные для обновления"}
         }), 400
 
+    title = film_data.get('title', '')
+    title_ru = film_data.get('title_ru', '')
+    if not title.strip() and title_ru.strip():
+        film_data['title'] = title_ru
+
     errors = validate_film_data(film_data)
     if errors:
         return jsonify({
@@ -160,6 +165,11 @@ def add_film():
             "errors": {"general": "Не предоставлены данные фильма"}
         }), 400
 
+    title = film_data.get('title', '')
+    title_ru = film_data.get('title_ru', '')
+    if not title.strip() and title_ru.strip():
+        film_data['title'] = title_ru
+        
     errors = validate_film_data(film_data)
     if errors:
         return jsonify({

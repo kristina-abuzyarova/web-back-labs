@@ -1,88 +1,134 @@
 from flask import Blueprint, render_template, request, jsonify, abort
 
-lab7 = Blueprint('lab7', __name__)
+lab7_bp = Blueprint('lab7', __name__)
 
-@lab7.route('/lab7/')
+@lab7_bp.route('/')
 def main():
     return render_template('lab7/index.html')
 
-films_data = [
+films = [
     {
         "id": 0,
-        "title": "Ferrari vs Lamborghini",
-        "title_ru": "Феррари против Ламборгини",
+        "title": "Midnight Express",
+        "title_ru": "Полуночный экспресс",
         "year": "2023",
-        "description": "История соперничества двух легендарных автомобильных брендов - Феррари и Ламборгини. Фильм рассказывает о страсти, инновациях и бескомпромиссной конкуренции в мире суперкаров."
+        "description": "Молодой гонщик-изгой участвует в запрещённых ночных гонках по улицам Токио, \
+            пытаясь доказать своё превосходство и выиграть легендарный приз. Его главным соперником \
+            оказывается загадочный гонщик в маске, чья личность скрыта за тайной."
     },
     {
         "id": 1,
-        "title": "Ford v Ferrari",
-        "title_ru": "Ford против Ferrari",
-        "year": "2019",
-        "description": "Американский автомобильный конструктор Кэрролл Шелби и британский гонщик Кен Майлз объединяются, чтобы построить революционный автомобиль для Ford и победить доминирующую команду Ferrari на 24 часах Ле-Мана в 1966 году."
+        "title": "Velocity Dreams",
+        "title_ru": "Мечты о скорости",
+        "year": "2024",
+        "description": "Гонщица-новичок бросает вызов патриархальному миру профессиональных автогонок. \
+            Преодолевая предрассудки и сомнения, она строит собственный гоночный автомобиль и готовится \
+            к участию в престижном чемпионате, где её ждёт противостояние с ветеранами трассы."
     },
     {
         "id": 2,
-        "title": "Rush",
-        "title_ru": "Гонка",
-        "year": "2013",
-        "description": "История эпического соперничества двух гонщиков Формулы-1 - британца Джеймса Ханта и австрийца Ники Лауды - во время сезона 1976 года."
+        "title": "Neon Circuits",
+        "title_ru": "Неоновые трассы",
+        "year": "2025",
+        "description": "В киберпанк-будущем гонки на антигравитационных автомобилях стали главным \
+            спортивным событием. Молодой пилот, выступающий под псевдонимом 'Феникс', раскрывает \
+            коррупционный скандал в лиге, рискуя своей карьерой и жизнью ради честных соревнований."
     },
     {
         "id": 3,
-        "title": "The Iron Giant",
-        "title_ru": "Железный гигант",
-        "year": "1999",
-        "description": "В разгар холодной войны молодой мальчик по имени Хогарт Хьюз находит гигантского металлического робота, упавшего с неба. Между ними завязывается необычная дружба."
+        "title": "Dust & Glory",
+        "title_ru": "Пыль и слава",
+        "year": "2022",
+        "description": "История команды механиков из маленького гаража, которые решают принять участие \
+            в легендарном ралли 'Дакар'. Не имея финансирования и опыта, они модифицируют старый внедорожник \
+            и отправляются в самое экстремальное путешествие своей жизни через пустыни Африки."
     },
     {
         "id": 4,
-        "title": "Real Steel",
-        "title_ru": "Железный кулак",
-        "year": "2011",
-        "description": "В недалёком будущем, где боксёрские поединки проводятся между огромными роботами, бывший боксёр Чарли Кентон и его сын Макс находят старого робота-боксёра, который может стать чемпионом."
-    },
+        "title": "The Last Lap",
+        "title_ru": "Последний круг",
+        "year": "2023",
+        "description": "Ветеран гонок, находящийся на грани завершения карьеры, получает шанс на финальный \
+            заезд в легендарной гонке '24 часа Ле-Мана'. Ему предстоит не только побороться за победу, \
+            но и передать опыт молодому напарнику, становясь для него наставником и другом."
+    }
 ]
 
-@lab7.route('/lab7/rest-api/films/', methods=['GET'])
+@lab7_bp.route('/rest-api/films/', methods=['GET'])
 def get_films():
-    return films
+    return jsonify({
+        "success": True,
+        "count": len(films),
+        "films": films
+    })
 
-
-@lab7.route('/lab7/rest-api/films/<int:id>', methods=['GET'])
+@lab7_bp.route('/rest-api/films/<int:id>', methods=['GET'])
 def get_films_by_id(id):
-    if id < 0 or id >= len(films):
-        return jsonify({"error": "Фильм не найден"}), 404
+    for film in films:
+        if film["id"] == id:
+            return jsonify({
+                "success": True,
+                "film": film
+            })
+    
+    return jsonify({
+        "success": False,
+        "error": f"Фильм с ID {id} не найден"
+    }), 404
 
-    return jsonify(films[id])
-
-
-@lab7.route('/lab7/rest-api/films/<int:id>', methods=['DELETE'])
+@lab7_bp.route('/rest-api/films/<int:id>', methods=['DELETE'])
 def del_film(id):
-    if id < 0 or id >= len(films):
-        return jsonify({"error": "Фильм не найден"}), 404
+    for i, film in enumerate(films):
+        if film["id"] == id:
+            del films[i]
+            return '', 204
+    
+    return jsonify({
+        "success": False,
+        "error": f"Фильм с ID {id} не найден"
+    }), 404
 
-    del films[id]
-    return '', 204
-
-
-@lab7.route('/lab7/rest-api/films/<int:id>', methods=['PUT'])
+@lab7_bp.route('/rest-api/films/<int:id>', methods=['PUT'])
 def put_film(id):
-    if id < 0 or id >= len(films):
-        return jsonify({"error": "Фильм не найден"}), 404
+    for i, film in enumerate(films):
+        if film["id"] == id:
+            film_data = request.get_json()
+            
+            if not film_data:
+                return jsonify({
+                    "success": False,
+                    "error": "Не предоставлены данные для обновления"
+                }), 400
+            
+            film_data["id"] = id  
+            films[i] = film_data
+            
+            return jsonify({
+                "success": True,
+                "film": film_data
+            })
+    
+    return jsonify({
+        "success": False,
+        "error": f"Фильм с ID {id} не найден"
+    }), 404
 
-    film = request.get_json()
-    film[id] = film
-    return films[id]
-
-@lab7.route('/lab7/rest-api/films/', methods=['POST'])
+@lab7_bp.route('/rest-api/films/', methods=['POST'])
 def add_film():
     film_data = request.get_json()
     
     if not film_data:
-        return jsonify({"error": "Не предоставлены данные фильма"}), 400
+        return jsonify({
+            "success": False,
+            "error": "Не предоставлены данные фильма"
+        }), 400
     
+    new_id = max([film["id"] for film in films], default=-1) + 1
+    film_data["id"] = new_id
     films.append(film_data)
     
-    new_id = len(films) - 1
-    return jsonify({"id": new_id}), 201
+    return jsonify({
+        "success": True,
+        "id": new_id,
+        "message": f"Фильм успешно добавлен с ID {new_id}"
+    }), 201

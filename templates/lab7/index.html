@@ -260,6 +260,7 @@
         <div class="form-group">
             <label for="title-ru">Название фильма на русском:</label>
             <input type="text" id="title-ru" required>
+            <div id="title-ru-error" class="error-message"></div>
             <span id="title-ru-error" class="error-message"></span>
         </div>
         
@@ -269,12 +270,14 @@
                 <span class="hint">(если фильм русский, то оставьте пустым)</span>:
             </label>
             <input type="text" id="title">
+            <div id="title-error" class="error-message"></div>
             <span id="title-error" class="error-message"></span>
         </div>
         
         <div class="form-group">
             <label for="year">Год выпуска:</label>
             <input type="number" id="year" min="1888" max="2100" required>
+            <div id="year-error" class="error-message"></div>
             <span id="year-error" class="error-message"></span>
         </div>
         

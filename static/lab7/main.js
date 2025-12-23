@@ -34,8 +34,8 @@ function fillFilmList() {
         for(let i = 0; i < films.length; i++) {
             let tr = document.createElement('tr');
 
-            let tdTitleRus = document.createElement('td');
             let tdTitle = document.createElement('td');
+            let tdTitleRus = document.createElement('td');
             let tdYear = document.createElement('td');
             let tdActions = document.createElement('td');
 
@@ -72,10 +72,10 @@ function fillFilmList() {
             tdActions.appendChild(editButton);
             tdActions.appendChild(delButton);
 
-            tr.appendChild(tdTitleRus);
-            tr.appendChild(tdTitle);
-            tr.appendChild(tdYear);
-            tr.appendChild(tdActions);
+            tr.appendChild(tdTitle);      
+            tr.appendChild(tdTitleRus);   
+            tr.appendChild(tdYear);        
+            tr.appendChild(tdActions);     
 
             tbody.appendChild(tr);
         }
@@ -162,8 +162,8 @@ function addFilm() {
 
 function editFilm(id) {
     console.log('Редактирование фильма с ID:', id);
-    
-    if (!id && id !== 0) {
+
+    if (id === undefined || id === null) {
         alert('ID фильма не указан');
         return;
     }
@@ -172,7 +172,9 @@ function editFilm(id) {
     .then(function (response) {
         console.log('Ответ при загрузке фильма для редактирования:', response.status);
         if (!response.ok) {
-            throw new Error('Ошибка загрузки: ' + response.status);
+            return response.json().then(err => {
+                throw new Error(err.error || 'Ошибка загрузки: ' + response.status);
+            });
         }
         return response.json();
     })
@@ -214,29 +216,28 @@ function sendFilm() {
     console.log('Данные фильма:', film, 'ID:', id);
 
     let isValid = true;
-    
+
+    document.getElementById('title-ru-error').innerText = '';
+    document.getElementById('title-error').innerText = '';
+    document.getElementById('year-error').innerText = '';
+    document.getElementById('description-error').innerText = '';
+
     if (!film.title_ru) {
         document.getElementById('title-ru-error').innerText = 'Название на русском обязательно';
         isValid = false;
-    } else {
-        document.getElementById('title-ru-error').innerText = '';
     }
-    
+
     if (!film.year) {
         document.getElementById('year-error').innerText = 'Год выпуска обязателен';
         isValid = false;
     } else if (!/^\d{4}$/.test(film.year)) {
         document.getElementById('year-error').innerText = 'Год должен быть 4-значным числом (например: 2024)';
         isValid = false;
-    } else {
-        document.getElementById('year-error').innerText = '';
     }
-    
+
     if (!film.description) {
         document.getElementById('description-error').innerText = 'Описание обязательно';
         isValid = false;
-    } else {
-        document.getElementById('description-error').innerText = '';
     }
     
     if (!isValid) {
@@ -267,7 +268,9 @@ function sendFilm() {
     .then(function (response) {
         console.log('Ответ от сервера при сохранении:', response.status);
         if (!response.ok) {
-            throw new Error('Ошибка сети: ' + response.status);
+            return response.json().then(err => {
+                throw new Error(err.error || JSON.stringify(err) || 'Ошибка сервера');
+            });
         }
         return response.json();
     })
@@ -281,6 +284,9 @@ function sendFilm() {
             if (data.errors) {
                 if (data.errors.title_ru) {
                     document.getElementById('title-ru-error').innerText = data.errors.title_ru;
+                }
+                if (data.errors.title) {
+                    document.getElementById('title-error').innerText = data.errors.title;
                 }
                 if (data.errors.year) {
                     document.getElementById('year-error').innerText = data.errors.year;
@@ -306,31 +312,5 @@ function sendFilm() {
 
 document.addEventListener('DOMContentLoaded', function() {
     console.log('DOM загружен, инициализируем приложение');
-
-    const addFilmBtn = document.querySelector('button[onclick="addFilm()"]');
-    if (addFilmBtn) {
-        console.log('Кнопка "Добавить фильм" найдена');
-    }
-
-    const cancelBtn = document.querySelector('button[onclick="cancel()"]');
-    if (cancelBtn) {
-        console.log('Кнопка "Отмена" найдена');
-    }
-
-    const okBtn = document.querySelector('button[onclick="sendFilm()"]');
-    if (okBtn) {
-        console.log('Кнопка "Ок" найдена');
-    }
-
     fillFilmList();
 });
-
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', function() {
-        console.log('DOM загружен (альтернативный метод)');
-        fillFilmList();
-    });
-} else {
-    console.log('DOM уже загружен');
-    fillFilmList();
-}

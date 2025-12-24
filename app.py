@@ -1,7 +1,11 @@
-from flask import Flask, url_for, request, render_template, jsonify
+from flask import Flask, url_for, request, session
 import os
 import datetime
 from dotenv import load_dotenv
+from os import path
+from dotenv import load_dotenv
+from db import db
+from db.models import User, Article
 from lab1 import lab1
 from lab2 import lab2
 from lab3 import lab3
@@ -16,8 +20,23 @@ app = Flask(__name__)
 app.secret_key = 'секретно-секретный секрет'
 load_dotenv()
 
-app.secret_key = 'your-secret-key-here'  
-app.config['DB_TYPE'] = 'postgres' 
+app.secret_key = os.getenv('SECRET_KEY', 'default-secret-key')
+db_type = os.getenv('DB_TYPE', 'sqlite')
+
+if db_type == 'postgres':
+    db_user = os.getenv('DB_USER', 'kristina_abuzyarova_orm')
+    db_password = os.getenv('DB_PASSWORD', '123')
+    db_host = os.getenv('DB_HOST', 'localhost')
+    db_name = os.getenv('DB_NAME', 'kristina_abuzyarova_orm')
+    app.config['SQLALCHEMY_DATABASE_URI'] = f'postgresql://{db_user}:{db_password}@{db_host}/{db_name}'
+else:
+    base_dir = path.dirname(path.abspath(__file__))
+    db_path = path.join(base_dir, 'kristina_abuzyarova_orm.db')
+    app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{db_path}'
+
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+db.init_app(app)
 
 app.register_blueprint(lab1)
 app.register_blueprint(lab2)
@@ -27,6 +46,7 @@ app.register_blueprint(lab5)
 app.register_blueprint(lab6)
 app.register_blueprint(lab7)
 app.register_blueprint(lab8)
+
 access_log = []
 
 @app.route('/lab7-fallback/')

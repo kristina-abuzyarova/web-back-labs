@@ -2,8 +2,410 @@
 
 {% block lab %}Лабораторная работа 9{% endblock %}
 
-{% block script %}{% endblock %}
-
 {% block main %}
-    <h1>Поздравления</h1>
+    
+<style>
+    body {
+        background: #024c96;
+        min-height: 100vh;
+        margin: 0;
+        padding: 20px;
+        font-family: 'Arial', sans-serif;
+        overflow-x: hidden;
+    }
+
+    .main {
+        max-width: 1200px;
+        margin: 0 auto;
+        text-align: center;
+        padding: 20px;
+        position: relative;
+    }
+
+    .title {
+        color: #ffffff;
+        margin: 0 0 20px;
+        text-shadow: 0 0 10px #7e8cf6;
+        font-size: 2.5em;
+    }
+
+    .auth-panel {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        background: rgba(255, 255, 255, 0.9);
+        padding: 10px 20px;
+        border-radius: 10px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        z-index: 100;
+    }
+
+    .auth-info {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .auth-btn {
+        padding: 5px 15px;
+        background: #7e8cf6;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 14px;
+        transition: background 0.3s;
+    }
+
+    .auth-btn:hover {
+        background: #7e8cf6;
+    }
+
+    .santa-btn {
+        background: #6236e9;
+        margin-left: 10px;
+    }
+
+    .santa-btn:hover {
+        background: #6236e9;
+    }
+
+    .counters {
+        background: #fff;
+        padding: 20px 40px;
+        border-radius: 15px;
+        margin: 60px auto 30px;
+        color: #000;
+        display: inline-block;
+        font-size: 1.2em;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        max-width: 500px;
+    }
+
+    .counter-item {
+        margin: 10px 0;
+        font-weight: bold;
+    }
+
+    .limit-note {
+        color: #adc3f5;
+        font-size: 1em;
+        margin-top: 10px;
+        font-weight: bold;
+    }
+
+    .restricted-note {
+        color: #ff045c;
+        font-size: 0.9em;
+        margin-top: 5px;
+        font-style: italic;
+    }
+
+    .area {
+        position: relative;
+        height: 600px;
+        width: 100%;
+        border: 3px solid #7e8cf6;
+        border-radius: 15px;
+        margin: 20px 0;
+        overflow: hidden;
+        background: rgba(255, 255, 255, 0.05);
+    }
+
+    .present {
+        position: absolute;
+        cursor: pointer;
+        width: 100px;
+        height: 100px;
+        z-index: 2;
+        transition: transform 0.3s;
+    }
+
+    .present.opened {
+        cursor: default;
+    }
+
+    .present.restricted {
+        border: 2px solid #7e8cf6;
+        border-radius: 10px;
+        box-shadow: 0 0 10px #7e8cf6;
+    }
+
+    .present img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+    }
+
+    .present:hover:not(.opened) {
+        transform: scale(1.1);
+    }
+
+    .popup {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.8);
+        z-index: 1000;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .popup-content {
+        background: linear-gradient(45deg, #7e8cf6, #7996ec);
+        padding: 40px;
+        border-radius: 15px;
+        text-align: center;
+        max-width: 500px;
+        width: 90%;
+        border: 3px solid #7e8cf6;
+        position: relative;
+    }
+
+    .gift-img {
+        width: 150px;
+        height: 150px;
+        margin: 20px auto;
+        object-fit: contain;
+        display: block;
+    }
+
+    .close-btn {
+        position: absolute;
+        top: 10px;
+        right: 15px;
+        cursor: pointer;
+        font-size: 28px;
+        color: #fff;
+        font-weight: bold;
+    }
+</style>
+
+<div class="main">
+    <div class="auth-panel">
+        {% if is_authenticated %}
+            <div class="auth-info">
+                <span>👤 {{ username }}</span>
+                <button class="auth-btn" onclick="logout()">Выйти</button>
+                <button class="auth-btn santa-btn" onclick="santaAction()">🎅 Санта Клаус 🎅 </button>
+            </div>
+        {% else %}
+            <div class="auth-info">
+                <span>Гость</span>
+                <button class="auth-btn" onclick="window.location.href='{{ url_for('lab9.login') }}'">
+                    Войти
+                </button>
+            </div>
+        {% endif %}
+    </div>
+    <h1 class="title">🎁 Новогодние Подарки 🎁</h1>
+    
+    <div class="counters">
+        <div class="counter-item">Открыто: <span id="open-count">{{ open_count }}</span></div>
+        <div class="counter-item">Осталось: <span id="left-count">{{ left_count }}</span></div>
+        <div class="limit-note">⚠️ Можно открыть только 3 подарка!</div>
+        {% if not is_authenticated %}
+            <div class="restricted-note">🎅 Некоторые подарки доступны только авторизованным пользователям!</div>
+        {% endif %}
+    </div>
+
+    <div class="area" id="area"></div>
+    
+</div>
+
+<div class="popup" id="popup">
+    <div class="popup-content">
+        <span class="close-btn" onclick="hidePopup()">×</span>
+        <h2 style="color: #f6ce3b97;">🎉 Поздравляю! 🎉</h2>
+        <div id="gift-holder"></div>
+        <p id="greeting-text" style="color: #fff; font-size: 1.2em; line-height: 1.5; margin: 20px 0;"></p>
+    </div>
+</div>
+
+<script>
+    const pos = {{ pos|tojson }};
+    const states = {{ states|tojson }};
+    const boxImages = {{ boxes|tojson }};
+    const restrictedGifts = {{ restricted_gifts|tojson }};
+    const isAuthenticated = {{ is_authenticated|tojson }};
+
+    const yourBoxImages = [
+        'box1.jpg', 'box2.jpg', 'box3.jpg', 'box4.jpg', 'box5.jpg',
+        'box6.jpg', 'box7.jpg', 'box8.jpg', 'box9.jpg', 'box10.jpg'
+    ];
+
+    const yourGiftImages = [
+        'gift1.jpg', 'gift2.jpg', 'gift3.jpg', 'gift4.jpg', 'gift5.jpg',
+        'gift6.jpg', 'gift7.jpg', 'gift8.jpg', 'gift9.jpg', 'gift10.jpg'
+    ];
+    
+    function loadPresents() {
+        const area = document.getElementById('area');
+        area.innerHTML = '';
+        
+        pos.forEach((p, idx) => {
+            const present = document.createElement('div');
+            present.className = `present ${states[idx] ? 'opened' : ''}`;
+
+            if (restrictedGifts.includes(idx) && !states[idx]) {
+                present.classList.add('restricted');
+            }
+
+            present.style.top = p.top;
+            present.style.left = p.left;
+            present.dataset.id = idx;
+            
+            const img = document.createElement('img');
+            if (states[idx]) {
+                img.src = "{{ url_for('static', filename='lab9/opened.png') }}";
+                img.alt = "Открытая коробка";
+            } else {
+                const boxImage = yourBoxImages[idx] || `box${idx + 1}.jpg`;
+                img.src = "{{ url_for('static', filename='lab9/') }}" + boxImage;
+                img.alt = "Закрытая коробка " + (idx + 1);
+
+                if (restrictedGifts.includes(idx) && !isAuthenticated) {
+                    img.style.opacity = '0.7';
+                }
+            }
+            
+            present.appendChild(img);
+            area.appendChild(present);
+            
+            if (!states[idx]) {
+                present.addEventListener('click', openPresent);
+            }
+        });
+    }
+    
+    function openPresent(event) {
+        const present = event.currentTarget;
+        const boxId = parseInt(present.dataset.id);
+        
+        fetch('{{ url_for("lab9.open_box") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ box_id: boxId })
+        })
+        .then(response => {
+            return response.json().then(data => ({ status: response.status, data }));
+        })
+        .then(({ status, data }) => {
+            if (status === 200 || status === 403) {
+                if (data.ok) {
+                    document.getElementById('open-count').textContent = data.open_count;
+                    document.getElementById('left-count').textContent = data.left_count;
+                    
+                    present.classList.add('opened');
+                    const img = present.querySelector('img');
+                    img.src = "{{ url_for('static', filename='lab9/opened.png') }}";
+                    img.alt = "Открытая коробка";
+                    
+                    present.removeEventListener('click', openPresent);
+
+                    showPopup(data.greeting, data.gift);
+                } else {
+                    if (data.requires_auth) {
+                        if (confirm(data.msg + '\n\nПерейти на страницу авторизации?')) {
+                            window.location.href = '{{ url_for("lab9.login") }}';
+                        }
+                    } else {
+                        alert(data.msg || 'Неизвестная ошибка');
+                    }
+                }
+            } else {
+                alert('Ошибка сервера: ' + (data.msg || 'Неизвестная ошибка'));
+            }
+        })
+        .catch(error => {
+            console.error('Ошибка при открытии подарка:', error);
+            alert('Ошибка сети. Проверьте подключение к интернету.');
+        });
+    }
+    
+    function showPopup(greeting, gift) {
+        const popup = document.getElementById('popup');
+        const text = document.getElementById('greeting-text');
+        const holder = document.getElementById('gift-holder');
+        
+        text.textContent = greeting;
+
+        let giftFile = gift;
+        if (!giftFile || !giftFile.includes('.jpg')) {
+            const randomIndex = Math.floor(Math.random() * yourGiftImages.length);
+            giftFile = yourGiftImages[randomIndex];
+        }
+        
+        holder.innerHTML = `<img src="{{ url_for('static', filename='lab9/gifts/') }}${giftFile}" class="gift-img" alt="Подарок">`;
+        
+        popup.style.display = 'flex';
+    }
+    
+    function hidePopup() {
+        document.getElementById('popup').style.display = 'none';
+    }
+    
+    function logout() {
+        fetch('{{ url_for("lab9.logout") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.ok) {
+                location.reload();
+            }
+        })
+        .catch(error => {
+            console.error('Ошибка при выходе:', error);
+        });
+    }
+    
+    function santaAction() {
+        if (confirm('🎅 Санта Клаус наполнит все коробки заново! Продолжить?')) {
+            fetch('{{ url_for("lab9.santa") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.ok) {
+                    alert(data.msg);
+                    location.reload();
+                } else {
+                    alert(data.msg || 'Ошибка при вызове Санта Клауса');
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка:', error);
+                alert('Ошибка при вызове Санта Клауса');
+            });
+        }
+    }
+    
+    document.addEventListener('DOMContentLoaded', () => {
+        loadPresents();
+        
+        document.getElementById('popup').addEventListener('click', (e) => {
+            if (e.target === document.getElementById('popup')) {
+                hidePopup();
+            }
+        });
+        
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                hidePopup();
+            }
+        });
+    });
+</script>
 {% endblock %}

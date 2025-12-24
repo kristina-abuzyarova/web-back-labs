@@ -22,6 +22,7 @@ def login():
     
     login_form = request.form.get('login')
     password_form = request.form.get('password')
+    remember_me = request.form.get('remember_me') == 'on'
     
     if not login_form or not login_form.strip():
         return render_template('lab8/login.html', error='Введите логин!')
@@ -31,7 +32,7 @@ def login():
     user = User.query.filter_by(login=login_form).first()
     
     if user and check_password_hash(user.password, password_form):
-        login_user(user, remember=False)
+        login_user(user, remember=remember_me)
         return redirect('/lab8/')
     
     return render_template('lab8/login.html', error='Ошибка входа: логин и/или пароль неверны')
@@ -70,9 +71,77 @@ def register():
 @lab8.route('/articles')
 @login_required 
 def articles():
-    return "список статей"
+    articles_list = Article.query.filter(
+        (Article.user_id == current_user.id) | (Article.is_public == True)
+    ).order_by(Article.id.desc()).all()
+    return render_template('lab8/articles.html', articles=articles_list)
 
-@lab8.route('/create')
+@lab8.route('/create', methods=['GET', 'POST'])
 @login_required
 def create():
-    return render_template('lab8/create.html')
+    if request.method == 'GET':
+        return render_template('lab8/create.html')
+    
+    title = request.form.get('title')
+    article_text = request.form.get('article_text')
+    is_public = request.form.get('is_public') == 'on'
+    
+    if not title or not title.strip():
+        return render_template('lab8/create.html', error='Введите заголовок статьи!')
+    if not article_text or not article_text.strip():
+        return render_template('lab8/create.html', error='Введите текст статьи!')
+    
+    new_article = Article(
+        title=title,
+        article_text=article_text,
+        is_public=is_public,
+        user_id=current_user.id,
+        likes=0
+    )
+    
+    db.session.add(new_article)
+    db.session.commit()
+
+    return redirect('/lab8/articles')  # ← ИСПРАВЛЕН ОТСТУП
+
+
+@lab8.route('/edit/<int:article_id>', methods=['GET', 'POST'])
+@login_required
+def edit_article(article_id):
+    article = Article.query.get_or_404(article_id)
+    
+    if article.user_id != current_user.id:
+        return redirect('/lab8/articles')
+    
+    if request.method == 'GET':
+        return render_template('lab8/edit.html', article=article)
+    
+    title = request.form.get('title')
+    article_text = request.form.get('article_text')
+    is_public = request.form.get('is_public') == 'on'
+    
+    if not title or not title.strip():
+        return render_template('lab8/edit.html', article=article, error='Введите заголовок статьи!')
+    if not article_text or not article_text.strip():
+        return render_template('lab8/edit.html', article=article, error='Введите текст статьи!')
+    
+    article.title = title
+    article.article_text = article_text
+    article.is_public = is_public
+    
+    db.session.commit()
+
+    return redirect('/lab8/articles')  
+
+@lab8.route('/delete/<int:article_id>', methods=['POST'])
+@login_required
+def delete_article(article_id):
+    article = Article.query.get_or_404(article_id)
+
+    if article.user_id != current_user.id:
+        return redirect('/lab8/articles')
+    
+    db.session.delete(article)
+    db.session.commit()
+    
+    return redirect('/lab8/articles')

@@ -6,6 +6,7 @@ from os import path
 from dotenv import load_dotenv
 from db import db
 from db.models import User, Article
+from flask_login import LoginManager
 from lab1 import lab1
 from lab2 import lab2
 from lab3 import lab3
@@ -38,6 +39,14 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db.init_app(app)
 
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = 'lab8.login'  
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
+
 app.register_blueprint(lab1)
 app.register_blueprint(lab2)
 app.register_blueprint(lab3)
@@ -45,7 +54,7 @@ app.register_blueprint(lab4)
 app.register_blueprint(lab5)
 app.register_blueprint(lab6)
 app.register_blueprint(lab7)
-app.register_blueprint(lab8)
+app.register_blueprint(lab8, url_prefix='/lab8')
 
 access_log = []
 

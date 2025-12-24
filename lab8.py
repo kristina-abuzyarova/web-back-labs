@@ -1,23 +1,46 @@
-from flask import Blueprint, render_template, request, redirect, session, current_app, url_for
+from flask import Blueprint, render_template, request, redirect, session
 from werkzeug.security import check_password_hash, generate_password_hash
-from flask_sqlalchemy import SQLAlchemy
-from os import path
+from flask_login import login_user, logout_user, login_required, current_user
 from db import db
 from db.models import User, Article
 
 lab8 = Blueprint('lab8', __name__)
 
-@lab8.route('/lab8/')
+@lab8.route('/')
 def lab():
-    username = session.get('login', 'anonymous')
+    if current_user.is_authenticated:
+        username = current_user.login
+    else:
+        username = 'anonymous'
     return render_template('lab8/lab8.html', username=username)
 
 
-@lab8.route('/lab8/login')
+@lab8.route('/login', methods=['GET', 'POST'])
 def login():
-    return render_template('lab8/login.html')
+    if request.method == 'GET':
+        return render_template('lab8/login.html')
+    
+    login_form = request.form.get('login')
+    password_form = request.form.get('password')
+    
+    if not login_form or not login_form.strip():
+        return render_template('lab8/login.html', error='Введите логин!')
+    if not password_form or not password_form.strip():
+        return render_template('lab8/login.html', error='Введите пароль!')
+    
+    user = User.query.filter_by(login=login_form).first()
+    
+    if user and check_password_hash(user.password, password_form):
+        login_user(user, remember=False)
+        return redirect('/lab8/')
+    
+    return render_template('lab8/login.html', error='Ошибка входа: логин и/или пароль неверны')
+@lab8.route('/logout')
+def logout():
+    logout_user()
+    return redirect('/lab8/')   
 
-@lab8.route('/lab8/register', methods=['GET', 'POST'])
+@lab8.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'GET':
         return render_template('lab8/register.html')
@@ -39,17 +62,16 @@ def register():
     db.session.add(new_user)
     db.session.commit()
     
-    session['login'] = login_form
-    session['user_id'] = new_user.id
+    login_user(new_user, remember=False)
     
     return redirect('/lab8/')
 
-
 @lab8.route('/lab8/articles')
+@login_required 
 def articles():
-    return render_template('lab8/articles.html')
+    return "список статей"
 
-
-@lab8.route('/lab8/create')
+@lab8.route('/create')
+@login_required
 def create():
     return render_template('lab8/create.html')

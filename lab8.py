@@ -1,12 +1,9 @@
-from flask import Blueprint, render_template, request, make_response, redirect, session, current_app, abort, jsonify
-import psycopg2
-from datetime import datetime
-from psycopg2.extras import RealDictCursor
-import sqlite3
+from flask import Blueprint, render_template, request, redirect, session, current_app, url_for
+from werkzeug.security import check_password_hash, generate_password_hash
+from flask_sqlalchemy import SQLAlchemy
 from os import path
 
 lab8 = Blueprint('lab8', __name__)
-
 
 @lab8.route('/lab8/')
 def lab():
@@ -17,7 +14,6 @@ def lab():
 @lab8.route('/lab8/login')
 def login():
     return render_template('lab8/login.html')
-
 
 @lab8.route('/lab8/register')
 def register():

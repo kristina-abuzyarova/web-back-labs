@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+
+{% block title %}Главная - Платформа инициатив{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>💡 Студенческие инициативы</h1>
+    <p>Предлагайте идеи, голосуйте за лучшие, улучшайте университет вместе!</p>
+</div>
+
+{% if initiatives %}
+    <div class="initiatives-count">
+        <p><i class="fas fa-list"></i> Найдено инициатив: {{ pagination.total }}</p>
+        {% if pagination.pages > 1 %}
+        <p><i class="fas fa-file-alt"></i> Страница {{ pagination.page }} из {{ pagination.pages }}</p>
+        {% endif %}
+    </div>
+
+    {% for initiative in initiatives %}
+    <div class="initiative-card">
+        <div class="initiative-header">
+            <h3>{{ initiative.title }}</h3>
+            <div class="score {{ 'positive' if initiative.score >= 0 else 'negative' }}">
+                {{ initiative.score }}
+            </div>
+        </div>
+        
+        <div class="initiative-meta">
+            <span><i class="fas fa-user"></i> {{ initiative.author.username }}</span>
+            <span><i class="fas fa-calendar"></i> {{ initiative.created_at.strftime('%d.%m.%Y %H:%M') }}</span>
+        </div>
+        
+        <div class="initiative-content">
+            {{ initiative.content }}
+        </div>
+        
+        <div class="vote-buttons">
+            {% if current_user %}
+                <a href="{{ url_for('vote', initiative_id=initiative.id, value=1, page=pagination.page) }}" 
+                   class="btn-vote upvote {% if initiative.user_vote == 1 %}active{% endif %}">
+                    <i class="fas fa-thumbs-up"></i> 
+                    Поддержать 
+                    {% if initiative.user_vote == 1 %}<span style="margin-left: 5px;">✓</span>{% endif %}
+                </a>
+                <a href="{{ url_for('vote', initiative_id=initiative.id, value=-1, page=pagination.page) }}" 
+                   class="btn-vote downvote {% if initiative.user_vote == -1 %}active{% endif %}">
+                    <i class="fas fa-thumbs-down"></i> 
+                    Против
+                    {% if initiative.user_vote == -1 %}<span style="margin-left: 5px;">✓</span>{% endif %}
+                </a>
+                
+                <!-- КНОПКИ УПРАВЛЕНИЯ - ВЫНЕСЕМ ОТДЕЛЬНО -->
+            {% else %}
+                <p style="color: #666; flex: 1;">
+                    <i class="fas fa-info-circle"></i>
+                    <a href="{{ url_for('login') }}">Войдите</a>, чтобы голосовать
+                </p>
+            {% endif %}
+        </div>
+        
+        <!-- ОТДЕЛЬНЫЙ БЛОК ДЛЯ КНОПОК УДАЛЕНИЯ И РЕДАКТИРОВАНИЯ -->
+        <div class="action-buttons">
+            {% if current_user %}
+                {% if current_user.id == initiative.author_id or current_user.is_admin %}
+                    <a href="{{ url_for('edit_initiative', initiative_id=initiative.id) }}" 
+                       class="btn-edit">
+                        <i class="fas fa-edit"></i> Редактировать
+                    </a>
+                    <a href="{{ url_for('delete', initiative_id=initiative.id, page=pagination.page) }}" 
+                       class="btn-delete"
+                       onclick="return confirm('Удалить инициативу «{{ initiative.title }}»?')">
+                        <i class="fas fa-trash"></i> Удалить
+                    </a>
+                {% endif %}
+            {% endif %}
+        </div>
+        
+        {% if initiative.score <= -5 %}
+        <div class="initiative-warning">
+            <i class="fas fa-exclamation-triangle"></i>
+            Внимание! Низкий рейтинг. При -10 очках инициатива будет автоматически удалена.
+        </div>
+        {% endif %}
+    </div>
+    {% endfor %}
+
+    {% if pagination.pages > 1 %}
+    <div class="pagination">
+        {% if pagination.has_prev %}
+        <a href="{{ url_for('index', page=pagination.prev_num) }}" class="page-link">
+            <i class="fas fa-chevron-left"></i> Назад
+        </a>
+        {% endif %}
+        
+        <div style="display: flex; gap: 5px;">
+            {% for page_num in pagination.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
+                {% if page_num %}
+                    {% if page_num == pagination.page %}
+                    <span class="page-number active">{{ page_num }}</span>
+                    {% else %}
+                    <a href="{{ url_for('index', page=page_num) }}" class="page-number">{{ page_num }}</a>
+                    {% endif %}
+                {% else %}
+                <span>...</span>
+                {% endif %}
+            {% endfor %}
+        </div>
+        
+        {% if pagination.has_next %}
+        <a href="{{ url_for('index', page=pagination.next_num) }}" class="page-link">
+            Показать еще <i class="fas fa-chevron-right"></i>
+        </a>
+        {% endif %}
+    </div>
+    {% endif %}
+{% else %}
+    <div class="no-initiatives">
+        <i class="fas fa-lightbulb"></i>
+        <h2>Пока нет инициатив</h2>
+        <p>Будьте первым, кто предложит идею для улучшения университета!</p>
+        {% if current_user %}
+        <a href="{{ url_for('create') }}" class="btn-primary" style="display: inline-block; width: auto; margin-top: 20px;">
+            <i class="fas fa-plus"></i> Создать первую инициативу
+        </a>
+        {% else %}
+        <a href="{{ url_for('login') }}" class="btn-primary" style="display: inline-block; width: auto; margin-top: 20px;">
+            <i class="fas fa-sign-in-alt"></i> Войти, чтобы создать
+        </a>
+        {% endif %}
+    </div>
+{% endif %}
+
+{% if current_user and initiatives %}
+<div style="text-align: center; margin-top: 30px;">
+    <a href="{{ url_for('create') }}" class="btn-primary" style="display: inline-block; width: auto;">
+        <i class="fas fa-plus"></i> Предложить свою инициативу
+    </a>
+</div>
+{% endif %}
+{% endblock %}

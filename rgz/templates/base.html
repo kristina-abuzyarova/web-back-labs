@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}💡 Платформа инициатив{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <a href="{{ url_for('index') }}" class="logo">
+                <i class="fas fa-lightbulb"></i> Платформа инициатив
+            </a>
+            <div class="student-info">{{ student_info.name }} | {{ student_info.group }}</div>
+            <div class="nav-links">
+                {% if current_user %}
+                    <a href="{{ url_for('create') }}" class="nav-link">
+                        <i class="fas fa-plus"></i> Новая инициатива
+                    </a>
+                    <span class="nav-link">
+                        <i class="fas fa-user"></i> {{ current_user.username }}
+                    </span>
+                    {% if current_user.is_admin %}
+                        <a href="{{ url_for('admin') }}" class="nav-link admin">
+                            <i class="fas fa-cog"></i> Админ-панель
+                        </a>
+                    {% endif %}
+                    <a href="{{ url_for('logout') }}" class="nav-link">
+                        <i class="fas fa-sign-out-alt"></i> Выйти
+                    </a>
+                    <a href="{{ url_for('delete_account') }}" class="nav-link" 
+                       onclick="return confirm('Удалить аккаунт? Все ваши инициативы будут удалены!')">
+                        <i class="fas fa-trash"></i> Удалить аккаунт
+                    </a>
+                {% else %}
+                    <a href="{{ url_for('login') }}" class="nav-link">
+                        <i class="fas fa-sign-in-alt"></i> Войти
+                    </a>
+                    <a href="{{ url_for('register') }}" class="nav-link">
+                        <i class="fas fa-user-plus"></i> Регистрация
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <main class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">
+                        <i class="fas fa-{{ 'check-circle' if category == 'success' else 'exclamation-circle' if category == 'error' else 'info-circle' }}"></i>
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </main>
+</body>
+</html>

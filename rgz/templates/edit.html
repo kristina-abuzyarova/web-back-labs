@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Редактировать инициативу</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Редактировать инициативу</h1>
+            <div class="student-info">
+                {{ student_info.name }}
+            </div>
+            <nav>
+                <a href="{{ url_for('index') }}">Главная</a>
+                {% if current_user %}
+                    <a href="{{ url_for('create') }}">Создать инициативу</a>
+                    <a href="{{ url_for('logout') }}">Выйти ({{ current_user.username }})</a>
+                    {% if current_user.is_admin %}
+                        <a href="{{ url_for('admin') }}">Админ панель</a>
+                    {% endif %}
+                {% else %}
+                    <a href="{{ url_for('login') }}">Войти</a>
+                    <a href="{{ url_for('register') }}">Регистрация</a>
+                {% endif %}
+            </nav>
+        </header>
+
+        <main>
+            <div class="flash-messages">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="flash {{ category }}">{{ message }}</div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+            </div>
+
+            <form method="POST" class="create-form">
+                <div class="form-group">
+                    <label for="title">Название инициативы:</label>
+                    <input type="text" id="title" name="title" value="{{ initiative.title }}" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="content">Описание инициативы:</label>
+                    <textarea id="content" name="content" rows="10" required>{{ initiative.content }}</textarea>
+                </div>
+                
+                <div class="form-buttons">
+                    <button type="submit" class="btn btn-primary">Сохранить изменения</button>
+                    <a href="{{ url_for('index') }}" class="btn btn-secondary">Отмена</a>
+                </div>
+            </form>
+
+            <div class="info-box">
+                <p><strong>Автор:</strong> {{ initiative.author.username }}</p>
+                <p><strong>Создано:</strong> {{ initiative.created_at.strftime('%d.%m.%Y %H:%M') }}</p>
+                <p><strong>Текущий рейтинг:</strong> {{ initiative.score }}</p>
+            </div>
+        </main>
+
+        <footer>
+            <p>Система студенческих инициатив</p>
+        </footer>
+    </div>
+</body>
+</html>
+

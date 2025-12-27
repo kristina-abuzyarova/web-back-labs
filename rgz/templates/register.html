@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %}Регистрация - Платформа инициатив{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <h2><i class="fas fa-user-plus"></i> Регистрация</h2>
+    
+    <form method="POST" action="{{ url_for('register') }}">
+        <div class="form-group">
+            <label for="username">Имя пользователя:</label>
+            <input type="text" id="username" name="username" class="form-control" required 
+                   placeholder="Только латинские буквы и цифры"
+                   pattern="[a-zA-Z0-9._-]+"
+                   title="Только латинские буквы, цифры и символы ._-">
+            <small style="display: block; margin-top: 5px; color: #666; font-size: 0.9rem;">
+                Пример: student_2024, john.doe
+            </small>
+        </div>
+        
+        <div class="form-group">
+            <label for="password">Пароль:</label>
+            <input type="password" id="password" name="password" class="form-control" required 
+                   placeholder="Минимум 6 символов" minlength="6">
+            <small style="display: block; margin-top: 5px; color: #666; font-size: 0.9rem;">
+                Минимум 6 символов
+            </small>
+        </div>
+        
+        <button type="submit" class="btn-primary">
+            <i class="fas fa-user-plus"></i> Зарегистрироваться
+        </button>
+    </form>
+    
+    <div style="text-align: center; margin-top: 25px; color: #666;">
+        <p>Уже есть аккаунт? <a href="{{ url_for('login') }}" style="color: #ffafcc; font-weight: bold;">Войдите</a></p>
+        <p style="margin-top: 10px;"><a href="{{ url_for('index') }}" style="color: #666; text-decoration: none;"><i class="fas fa-arrow-left"></i> Вернуться на главную</a></p>
+    </div>
+</div>
+{% endblock %}
